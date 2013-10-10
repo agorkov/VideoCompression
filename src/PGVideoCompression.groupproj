@@ -1,0 +1,72 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{0373C20B-6050-44DF-AE1E-6715BDA39E9A}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="Создание базы фрагментов\GetBase.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Тестирование базы\GetBaseInfo.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Слияние баз\MergeBases.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Предварительный просмотр\Preview.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="GetBase">
+			<MSBuild Projects="Создание базы фрагментов\GetBase.dproj"/>
+		</Target>
+		<Target Name="GetBase:Clean">
+			<MSBuild Projects="Создание базы фрагментов\GetBase.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="GetBase:Make">
+			<MSBuild Projects="Создание базы фрагментов\GetBase.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="GetBaseInfo">
+			<MSBuild Projects="Тестирование базы\GetBaseInfo.dproj"/>
+		</Target>
+		<Target Name="GetBaseInfo:Clean">
+			<MSBuild Projects="Тестирование базы\GetBaseInfo.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="GetBaseInfo:Make">
+			<MSBuild Projects="Тестирование базы\GetBaseInfo.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="MergeBases">
+			<MSBuild Projects="Слияние баз\MergeBases.dproj"/>
+		</Target>
+		<Target Name="MergeBases:Clean">
+			<MSBuild Projects="Слияние баз\MergeBases.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="MergeBases:Make">
+			<MSBuild Projects="Слияние баз\MergeBases.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="Preview">
+			<MSBuild Projects="Предварительный просмотр\Preview.dproj"/>
+		</Target>
+		<Target Name="Preview:Clean">
+			<MSBuild Projects="Предварительный просмотр\Preview.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="Preview:Make">
+			<MSBuild Projects="Предварительный просмотр\Preview.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="GetBase;GetBaseInfo;MergeBases;Preview"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="GetBase:Clean;GetBaseInfo:Clean;MergeBases:Clean;Preview:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="GetBase:Make;GetBaseInfo:Make;MergeBases:Make;Preview:Make"/>
+		</Target>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
+	</Project>

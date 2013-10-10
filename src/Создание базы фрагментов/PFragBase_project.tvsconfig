@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<TgConfig Version="3" SubLevelDisabled="False">
+  <Option Name="namespaceFolder.UGlobal" Type="System.String" Value="UGlobal" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.UProcess" Type="System.String" Value="UProcess" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.PFragBase" Type="System.String" Value="PFragBase" Category="General" IsBrowsable="False" />
+</TgConfig>
