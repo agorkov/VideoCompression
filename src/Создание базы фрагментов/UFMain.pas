@@ -81,11 +81,12 @@ begin
       USettings.BaseColor:=green;
     if paramstr(3)='blue' then
       USettings.BaseColor:=blue;
-    if paramstr(3)='greyscale' then
+    if paramstr(3)='grayscale' then
       USettings.BaseColor:=grayscale;
 
     TrackBar2.Max:=UGlobal.FragSize;
     TrackBar2.Position:=1;
+    CBWindowsFilter.Checked:=false;
     if pos('+W',paramstr(4))=1 then
     begin
       CBWindowsFilter.Checked:=true;
