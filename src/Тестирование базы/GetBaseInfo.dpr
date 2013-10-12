@@ -55,7 +55,7 @@ begin
     else
       rewrite(f);
 
-    delete(FileName,pos('.',FileName),length(FileName));
+    //delete(FileName,pos('.',FileName),length(FileName));
     writeln(f,FileName+' '+inttostr(Elem)+' '+inttostr(Uniq)+' '+FloatToStrF(entropy,ffFixed,7,7));
     CloseFile(f);
   except
