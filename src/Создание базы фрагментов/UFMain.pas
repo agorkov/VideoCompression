@@ -68,12 +68,21 @@ begin
   if paramcount = 5 then
   begin
     USettings.FileName := ParamStr(1);
+    FMain.Caption:=USettings.FileName;
+    FMain.Caption :=FMain.Caption +' '+'Создание базы уникальных' ;
 
     if ParamStr(2) = 'd' then
+    begin
       USettings.ElemBase := DiffBase;
+      FMain.Caption :=FMain.Caption +' '+'разностей';
+    end;
     if ParamStr(2) = 'f' then
+    begin
       USettings.ElemBase := FragBase;
+      FMain.Caption :=FMain.Caption +' '+'фрагментов';
+    end;
 
+    FMain.Caption :=FMain.Caption +' '+ParamStr(3);
     if ParamStr(3) = 'RGB.R' then
       USettings.BaseColor := RGB_R;
     if ParamStr(3) = 'RGB.G' then

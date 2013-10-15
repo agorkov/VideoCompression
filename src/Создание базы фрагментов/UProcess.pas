@@ -147,9 +147,9 @@ begin
       R := p[3 * j + 2];
 
       case USettings.BaseColor of
-      RGB_R: val := R;
-      RGB_G: val := g;
-      RGB_B: val := b;
+      USettings.RGB_R: val := R;
+      USettings.RGB_G: val := g;
+      USettings.RGB_B: val := b;
       USettings.YIQ_Y: val := round(0.299 * R + 0.587 * g + 0.114 * b);
       USettings.YIQ_I: val := round(0.596 * R + 0.274 * g + 0.321 * b);
       USettings.YIQ_Q: val := round(0.211 * R + 0.523 * g + 0.311 * b);
@@ -182,17 +182,10 @@ begin
         val := 5 + Frame[i + 1, j + 1] * 10
       else
         val := 170;
-      case USettings.BaseColor of
-      RGB_R: pr[3 * j + 2] := val;
-      RGB_G: pr[3 * j + 1] := val;
-      RGB_B: pr[3 * j] := val;
-      USettings.YIQ_Y, USettings.YIQ_I, USettings.YIQ_Q:
-        begin
-          pr[3 * j] := val;
-          pr[3 * j + 1] := val;
-          pr[3 * j + 2] := val;
-        end;
-      end;
+
+      pr[3 * j] := val;
+      pr[3 * j + 1] := val;
+      pr[3 * j + 2] := val;
     end;
   end;
   UFMain.FMain.Image1.Picture.Bitmap := BMR;
