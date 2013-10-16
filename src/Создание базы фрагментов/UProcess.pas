@@ -131,6 +131,28 @@ begin
       FrameOld[i, j] := Frame[i, j];
 end;
 
+function quantization(val: byte): byte;
+var
+  R: byte;
+begin
+  if val > 150 then
+    R := 15
+  else
+    R := val div 10;
+  quantization := R;
+end;
+
+function dequantization(val: byte): byte;
+var
+  R: byte;
+begin
+  if val < 15 then
+    R := 5 + val * 10
+  else
+    R := 170;
+  dequantization := R;
+end;
+
 procedure CreateFrame;
 var
   i, j: LongWord;
@@ -156,10 +178,7 @@ begin
     else val := 0;
       end;
 
-      if val > 150 then
-        Frame[i + 1, j + 1] := 15
-      else
-        Frame[i + 1, j + 1] := val div 10;
+      Frame[i + 1, j + 1] := quantization(val);
     end;
   end;
 end;
@@ -178,10 +197,7 @@ begin
       pr[3 * j] := 0;
       pr[3 * j + 1] := 0;
       pr[3 * j + 2] := 0;
-      if Frame[i + 1, j + 1] < 15 then
-        val := 5 + Frame[i + 1, j + 1] * 10
-      else
-        val := 170;
+      val := dequantization(Frame[i + 1, j + 1]);
 
       pr[3 * j] := val;
       pr[3 * j + 1] := val;
