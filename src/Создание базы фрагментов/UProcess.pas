@@ -10,14 +10,15 @@ var
 
 procedure ProcessFrame;
 procedure WriteBASE;
+function BaseFull: byte;
 
 implementation
 
 uses
-  UGlobal, USettings, UFrag, UMergeList, SysUtils, Windows, UFMain;
+  UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings;
 
 const
-  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 10000;
+  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 12500;
   FilterBase = 1;
 
 var
@@ -27,6 +28,11 @@ var
   BASE: array [1 .. MAX_BASE_COUNT] of TRFrag;
   SAVED_BASE: LongWord;
   FrameNum: LongWord;
+
+function BaseFull: byte;
+begin
+  BaseFull := round(BASE_COUNT / MAX_BASE_COUNT * 100);
+end;
 
 procedure WriteBASE;
   procedure QuickSort;
@@ -66,6 +72,7 @@ var
   f: TextFile;
   i, k: LongWord;
   UniqCount: int64;
+  FileName: shortstring;
 begin
   QuickSort;
   k := 1;
@@ -81,7 +88,8 @@ begin
   end;
 
   SAVED_BASE := SAVED_BASE + 1;
-  AssignFile(f, USettings.FileName + '_' + inttostr(SAVED_BASE) + '.base');
+  FileName := USettings.FileName + '_' + GetRandomName + '.base';
+  AssignFile(f, FileName);
   rewrite(f);
   UniqCount := 0;
   for i := 1 to BASE_COUNT do
@@ -92,7 +100,7 @@ begin
       UniqCount := UniqCount + 1;
     end;
   end;
-  UMergeList.AddPartBase(UniqCount);
+  UMergeList.AddPartBase(FileName, UniqCount);
   CloseFile(f);
 
   for i := 1 to BASE_COUNT do
@@ -132,19 +140,13 @@ begin
 end;
 
 function quantization(val: byte): byte;
-var
-  R: byte;
 begin
-  r:=val;
-  quantization := R;
+  quantization := val div UGlobal.quantizationStep;
 end;
 
 function dequantization(val: byte): byte;
-var
-  R: byte;
 begin
-  r:=val;
-  dequantization := R;
+  dequantization := val * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
 end;
 
 procedure CreateFrame;

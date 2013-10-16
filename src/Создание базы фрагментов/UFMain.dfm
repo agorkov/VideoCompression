@@ -3,7 +3,7 @@ object FMain: TFMain
   Top = 0
   Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1091#1085#1080#1082#1072#1083#1100#1085#1099#1093' '#1088#1072#1079#1085#1086#1089#1090#1077#1081
   ClientHeight = 279
-  ClientWidth = 815
+  ClientWidth = 855
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -47,11 +47,19 @@ object FMain: TFMain
     Height = 240
   end
   object Label2: TLabel
-    Left = 660
+    Left = 692
     Top = 115
     Width = 87
     Height = 13
     Caption = #1055#1086#1088#1086#1075' '#1092#1080#1083#1100#1090#1088#1072' - '
+  end
+  object Gauge1: TGauge
+    Left = 660
+    Top = 8
+    Width = 26
+    Height = 263
+    Kind = gkVerticalBar
+    Progress = 0
   end
   object MP: TMediaPlayer
     Left = 8
@@ -80,7 +88,7 @@ object FMain: TFMain
     TabOrder = 2
   end
   object CBShowResult: TCheckBox
-    Left = 660
+    Left = 692
     Top = 8
     Width = 141
     Height = 17
@@ -90,7 +98,7 @@ object FMain: TFMain
     TabOrder = 3
   end
   object CBShowDiffPixels: TCheckBox
-    Left = 660
+    Left = 692
     Top = 31
     Width = 141
     Height = 26
@@ -99,7 +107,7 @@ object FMain: TFMain
     WordWrap = True
   end
   object CBSaveResults: TCheckBox
-    Left = 660
+    Left = 692
     Top = 63
     Width = 141
     Height = 17
@@ -107,7 +115,7 @@ object FMain: TFMain
     TabOrder = 5
   end
   object TrackBar2: TTrackBar
-    Left = 660
+    Left = 692
     Top = 134
     Width = 138
     Height = 45
@@ -119,7 +127,7 @@ object FMain: TFMain
     OnChange = TrackBar2Change
   end
   object CBWindowsFilter: TCheckBox
-    Left = 660
+    Left = 692
     Top = 96
     Width = 138
     Height = 17
@@ -128,7 +136,7 @@ object FMain: TFMain
     OnClick = CBWindowsFilterClick
   end
   object CBMedianFilter: TCheckBox
-    Left = 660
+    Left = 692
     Top = 185
     Width = 138
     Height = 17

@@ -3,7 +3,8 @@ unit UFMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.MPlayer, Vcl.ComCtrls;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.MPlayer, Vcl.ComCtrls,
+  Vcl.Samples.Gauges;
 
 type
   TFMain = class(TForm)
@@ -18,6 +19,7 @@ type
     TrackBar2: TTrackBar;
     CBWindowsFilter: TCheckBox;
     CBMedianFilter: TCheckBox;
+    Gauge1: TGauge;
     procedure FormActivate(Sender: TObject);
     procedure TrackBar2Change(Sender: TObject);
     procedure CBWindowsFilterClick(Sender: TObject);
@@ -139,6 +141,7 @@ begin
         UProcess.BM.Canvas.CopyRect(Rect(0, 0, UProcess.BM.Width, BM.Height), FMain.Canvas, Rect(PVideo.Left, PVideo.Top, PVideo.Left + PVideo.Width - 1, PVideo.Top + PVideo.Height - 1));
         UProcess.ProcessFrame;
         ProgressBar1.StepBy(1);
+        Gauge1.Progress:=UProcess.BaseFull;
         Application.ProcessMessages;
       end;
       MP.Close;
