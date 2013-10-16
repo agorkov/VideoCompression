@@ -67,7 +67,7 @@ var
   SegCount, SegNum: word;
   i: word;
 begin
-  if paramcount = 5 then
+  if paramcount = 6 then
   begin
     USettings.FileName := ParamStr(1);
     FMain.Caption:=USettings.FileName;
@@ -148,6 +148,7 @@ begin
     end;
     UProcess.WriteBase;
   end;
+  USettings.FileName:=ParamStr(6);
   UMergeList.MergePartBaseList;
 
   FMain.Close;
