@@ -11,7 +11,7 @@ uses
 var
 FileName: string;
 f: TextFile;
-str: string[UGlobal.FragSize*4];
+str: string[UGlobal.FragSize*bpp];
 Elem, Uniq, tmp: int64;
 entropy: double;
 begin

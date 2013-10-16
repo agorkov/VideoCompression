@@ -11,7 +11,7 @@ uses
 
 type
   TRFrag = record
-    frag: string[UGlobal.FragSize*4];
+    frag: string[UGlobal.FragSize*bpp];
     q: Int64;
   end;
 

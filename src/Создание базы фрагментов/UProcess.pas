@@ -135,10 +135,7 @@ function quantization(val: byte): byte;
 var
   R: byte;
 begin
-  if val > 150 then
-    R := 15
-  else
-    R := val div 10;
+  r:=val;
   quantization := R;
 end;
 
@@ -146,10 +143,7 @@ function dequantization(val: byte): byte;
 var
   R: byte;
 begin
-  if val < 15 then
-    R := 5 + val * 10
-  else
-    R := 170;
+  r:=val;
   dequantization := R;
 end;
 
