@@ -18,7 +18,7 @@ uses
   UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings;
 
 const
-  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 12500;
+  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 1000;
   FilterBase = 1;
 
 var
