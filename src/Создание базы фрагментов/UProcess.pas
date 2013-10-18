@@ -212,9 +212,9 @@ var
 begin
   AssignFile(f, inttostr(FrameNum) + '.txt');
   rewrite(f);
-  for i := 1 to 240 do
+  for i := 1 to UGlobal.PicH do
   begin
-    for j := 1 to 320 do
+    for j := 1 to UGlobal.PicW do
       write(f, Frame[i, j]);
     writeln(f);
   end;
