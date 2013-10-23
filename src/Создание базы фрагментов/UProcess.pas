@@ -7,6 +7,7 @@ uses
 
 var
   BM, BMR: TBitMap;
+  FrameNum: LongWord;
 
 procedure ProcessFrame;
 procedure WriteBASE;
@@ -26,8 +27,6 @@ var
   FrameBase: array [1 .. UGlobal.FrameBaseSize] of UFrag.TRFrag;
   BASE_COUNT: LongWord;
   BASE: array [1 .. MAX_BASE_COUNT] of TRFrag;
-  SAVED_BASE: LongWord;
-  FrameNum: LongWord;
 
 function BaseFull: byte;
 begin
@@ -71,34 +70,60 @@ procedure WriteBASE;
 var
   f: TextFile;
   i, k: LongWord;
-  UniqCount: int64;
+  UniqCount, p: int64;
   FileName: shortstring;
 begin
   QuickSort;
+  p := 0;
+  for i := 1 to BASE_COUNT do
+    p := p + BASE[i].count;
+  i := 1;
+  while p >= UGlobal.FrameBaseSize do
+  begin
+    p := p - UGlobal.FrameBaseSize;
+    i := i + 1;
+  end;
+  if p <> 0 then
+    Sleep(1);
+
   k := 1;
   for i := 2 to BASE_COUNT do
   begin
     if UFrag.CompareFrag(BASE[i].frag, BASE[k].frag) = 1 then
-    begin
-      BASE[k].count := BASE[k].count + BASE[i].count;
-      BASE[i].count := 0;
-    end
+      BASE[k].count := BASE[k].count + BASE[i].count
     else
-      k := i;
+    begin
+      k := k + 1;
+      BASE[k].frag := BASE[i].frag;
+      BASE[k].count := BASE[i].count;
+    end;
+    if i <> k then
+      BASE[i].count := 0;
   end;
 
-  SAVED_BASE := SAVED_BASE + 1;
+  p := 0;
+  i := 1;
+  while (BASE[i].count > 0) and (i <= BASE_COUNT) do
+  begin
+    p := p + BASE[i].count;
+    i := i + 1;
+  end;
+  i := 1;
+  while p >= UGlobal.FrameBaseSize do
+    p := p - UGlobal.FrameBaseSize;
+  if p <> 0 then
+    Sleep(1);
+
   FileName := USettings.FileName + '_' + GetRandomName + '.base';
   AssignFile(f, FileName);
   rewrite(f);
   UniqCount := 0;
-  for i := 1 to BASE_COUNT do
+  i := 1;
+  while (BASE[i].count > 0) and (i <= BASE_COUNT) do
   begin
-    if BASE[i].count <> 0 then
-    begin
-      writeln(f, UFrag.FragToString(BASE[i].frag), ' ', BASE[i].count);
-      UniqCount := UniqCount + 1;
-    end;
+    writeln(f, UFrag.FragToString(BASE[i].frag), ' ', BASE[i].count);
+    UniqCount := UniqCount + 1;
+    i := i + 1;
   end;
   UMergeList.AddPartBase(FileName, UniqCount);
   CloseFile(f);
@@ -113,7 +138,6 @@ var
   i, j: LongWord;
 begin
   BASE_COUNT := 0;
-  SAVED_BASE := 0;
   FilterThresold := 25;
 
   for i := 1 to MAX_BASE_COUNT do
@@ -221,7 +245,7 @@ begin
   CloseFile(f);
 end;
 
-procedure CreateLocalDiffBase;
+procedure SealLocalBase();
   procedure QuickSort;
     procedure sort(L, R: LongWord);
     var
@@ -255,6 +279,27 @@ procedure CreateLocalDiffBase;
     sort(1, UGlobal.FrameBaseSize);
   end;
 
+var
+  i, k: LongWord;
+begin
+  QuickSort;
+  k := 1;
+  for i := 2 to UGlobal.FrameBaseSize do
+  begin
+    if UFrag.CompareFrag(FrameBase[i].frag, FrameBase[k].frag) = 1 then
+      FrameBase[k].count := FrameBase[k].count + 1
+    else
+    begin
+      k := k + 1;
+      FrameBase[k].frag := FrameBase[i].frag;
+      FrameBase[k].count := FrameBase[i].count;
+    end;
+    if i <> k then
+      FrameBase[i].count := 0;
+  end;
+end;
+
+procedure CreateLocalDiffBase;
 var
   i, j, k, L, R, c, p: LongWord;
   str, strOld: UFrag.TFrag;
@@ -287,56 +332,10 @@ begin
     i := i + UGlobal.FragH;
     j := 1;
   end;
-
-  QuickSort;
-
-  k := 1;
-  for i := 2 to UGlobal.FrameBaseSize do
-  begin
-    if UFrag.CompareFrag(FrameBase[i].frag, FrameBase[k].frag) = 1 then
-    begin
-      FrameBase[k].count := FrameBase[k].count + 1;
-      FrameBase[i].count := 0;
-    end
-    else
-      k := i;
-  end;
+  SealLocalBase;
 end;
 
 procedure CreateLocalFragBase;
-  procedure QuickSort;
-    procedure sort(L, R: LongWord);
-    var
-      w, x: UFrag.TRFrag;
-      i, j: LongWord;
-    begin
-      i := L;
-      j := R;
-      x := FrameBase[(L + R) div 2];
-      repeat
-        while UFrag.CompareFrag(FrameBase[i].frag, x.frag) = 0 do
-          i := i + 1;
-        while UFrag.CompareFrag(x.frag, FrameBase[j].frag) = 0 do
-          j := j - 1;
-        if i <= j then
-        begin
-          w := FrameBase[i];
-          FrameBase[i] := FrameBase[j];
-          FrameBase[j] := w;
-          i := i + 1;
-          j := j - 1;
-        end;
-      until i > j;
-      if L < j then
-        sort(L, j);
-      if i < R then
-        sort(i, R);
-    end;
-
-  begin
-    sort(1, UGlobal.FrameBaseSize);
-  end;
-
 var
   i, j, k, R, c, p: LongWord;
   frag: UFrag.TFrag;
@@ -363,20 +362,7 @@ begin
     i := i + UGlobal.FragH;
     j := 1;
   end;
-
-  QuickSort;
-
-  k := 1;
-  for i := 2 to UGlobal.FrameBaseSize do
-  begin
-    if UFrag.CompareFrag(FrameBase[i].frag, FrameBase[k].frag) = 1 then
-    begin
-      FrameBase[k].count := FrameBase[k].count + 1;
-      FrameBase[i].count := 0;
-    end
-    else
-      k := i;
-  end;
+  SealLocalBase;
 end;
 
 procedure AddToBase;
@@ -385,14 +371,14 @@ var
 begin
   if BASE_COUNT + UGlobal.FrameBaseSize > MAX_BASE_COUNT then
     WriteBASE;
-  for i := 1 to UGlobal.FrameBaseSize do
-    if FrameBase[i].count <> 0 then
-    begin
-      BASE_COUNT := BASE_COUNT + 1;
-      BASE[BASE_COUNT].frag := FrameBase[i].frag;
-      BASE[BASE_COUNT].count := FrameBase[i].count;
-    end;
-
+  i := 1;
+  while (FrameBase[i].count > 0) and (i <= UGlobal.FrameBaseSize) do
+  begin
+    BASE_COUNT := BASE_COUNT + 1;
+    BASE[BASE_COUNT].frag := FrameBase[i].frag;
+    BASE[BASE_COUNT].count := FrameBase[i].count;
+    i := i + 1;
+  end;
   for i := 1 to UGlobal.FrameBaseSize do
     FrameBase[i].count := 0;
 end;
@@ -465,24 +451,26 @@ end;
 
 procedure ProcessFrame;
 begin
-  CopyFrame;
+  // if FrameNum = 27962 then
+  begin
+    CopyFrame;
+    CreateFrame;
 
-  CreateFrame;
+    if USettings.NeedWindowFilter then
+      WindowFilter;
+    if USettings.NeedMedianFilter then
+      MedianFilter;
 
-  if USettings.NeedWindowFilter then
-    WindowFilter;
-  if USettings.NeedMedianFilter then
-    MedianFilter;
+    ShowResultFrame;
+    // SaveFrame(FrameNum);
 
-  ShowResultFrame;
-  // SaveFrame(FrameNum);
+    case USettings.ElemBase of
+    FragBase: CreateLocalFragBase;
+    DiffBase: CreateLocalDiffBase;
+    end;
 
-  case USettings.ElemBase of
-  FragBase: CreateLocalFragBase;
-  DiffBase: CreateLocalDiffBase;
+    AddToBase;
   end;
-
-  AddToBase;
   FrameNum := FrameNum + 1;
 end;
 

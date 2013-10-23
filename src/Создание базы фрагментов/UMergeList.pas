@@ -13,7 +13,7 @@ uses
 
 type
   TRPartBase = record
-    PartBaseName: string;
+    PartBaseName: shortstring;
     FragCount: int64;
   end;
 
@@ -26,12 +26,12 @@ var
 function GetRandomName: shortString;
 var
   i: byte;
-  R: string;
+  R: shortstring;
 begin
   Randomize;
   R := '';
   for i := 1 to 10 do
-    R := R + chr(65 + random(26));
+    R := R + shortstring(chr(65 + random(26)));
   GetRandomName := R;
 end;
 
@@ -59,7 +59,7 @@ procedure MergePartBaseList;
   end;
 
 var
-  b1n, b2n, brn: string;
+  b1n, b2n, brn: shortstring;
 begin
   while PartBaseCount > 1 do
   begin
@@ -73,7 +73,7 @@ begin
     PBList[PartBaseCount - 1].FragCount := UMerge.Merge(b1n, b2n, brn, true);
     PartBaseCount := PartBaseCount - 1;
   end;
-  RenameFile(PBList[1].PartBaseName, USettings.FileName + '.base')
+  RenameFile(string(PBList[1].PartBaseName), string(USettings.FileName + '.base'))
 end;
 
 initialization

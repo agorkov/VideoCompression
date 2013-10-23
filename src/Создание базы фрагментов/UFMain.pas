@@ -3,8 +3,7 @@ unit UFMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.MPlayer, Vcl.ComCtrls,
-  Vcl.Samples.Gauges;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.MPlayer, Vcl.ComCtrls, Vcl.Samples.Gauges;
 
 type
   TFMain = class(TForm)
@@ -70,21 +69,21 @@ begin
   if paramcount = 6 then
   begin
     USettings.FileName := ParamStr(1);
-    FMain.Caption:=USettings.FileName;
-    FMain.Caption :=FMain.Caption +' '+'Создание базы уникальных' ;
+    FMain.Caption := USettings.FileName;
+    FMain.Caption := FMain.Caption + ' ' + 'Создание базы уникальных';
 
     if ParamStr(2) = 'd' then
     begin
       USettings.ElemBase := DiffBase;
-      FMain.Caption :=FMain.Caption +' '+'разностей';
+      FMain.Caption := FMain.Caption + ' ' + 'разностей';
     end;
     if ParamStr(2) = 'f' then
     begin
       USettings.ElemBase := FragBase;
-      FMain.Caption :=FMain.Caption +' '+'фрагментов';
+      FMain.Caption := FMain.Caption + ' ' + 'фрагментов';
     end;
 
-    FMain.Caption :=FMain.Caption +' '+ParamStr(3);
+    FMain.Caption := FMain.Caption + ' ' + ParamStr(3);
     if ParamStr(3) = 'RGB.R' then
       USettings.BaseColor := RGB_R;
     if ParamStr(3) = 'RGB.G' then
@@ -141,14 +140,14 @@ begin
         UProcess.BM.Canvas.CopyRect(Rect(0, 0, UProcess.BM.Width, BM.Height), FMain.Canvas, Rect(PVideo.Left, PVideo.Top, PVideo.Left + PVideo.Width - 1, PVideo.Top + PVideo.Height - 1));
         UProcess.ProcessFrame;
         ProgressBar1.StepBy(1);
-        Gauge1.Progress:=UProcess.BaseFull;
+        Gauge1.Progress := UProcess.BaseFull;
         Application.ProcessMessages;
       end;
       MP.Close;
     end;
     UProcess.WriteBase;
   end;
-  USettings.FileName:=ParamStr(6);
+  USettings.FileName := ParamStr(6);
   UMergeList.MergePartBaseList;
 
   FMain.Close;

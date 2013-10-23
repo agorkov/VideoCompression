@@ -2,7 +2,7 @@ unit UMerge;
 
 interface
 
-function Merge(f1n,f2n,fbn: string; EraseFiles: boolean): int64;
+function Merge(f1n,f2n,fbn: shortstring; EraseFiles: boolean): int64;
 
 implementation
 
@@ -71,13 +71,13 @@ begin
   uniq:=uniq+1;
 end;
 
-function Merge(f1n,f2n,fbn: string; EraseFiles: boolean): int64;
+function Merge(f1n,f2n,fbn: shortstring; EraseFiles: boolean): int64;
 begin
   c1:=0; c2:=0; cb:=0; uniq:=0;
 
-  Assign(f1,f1n); reset(f1);
-  Assign(f2,f2n); reset(f2);
-  Assign(fb,fbn); rewrite(fb);
+  Assign(f1,string(f1n)); reset(f1);
+  Assign(f2,string(f2n)); reset(f2);
+  Assign(fb,string(fbn)); rewrite(fb);
 
   fl1:=true; fl2:=true;
   while (not EOF(f1)) or (not EOF(f2)) do
