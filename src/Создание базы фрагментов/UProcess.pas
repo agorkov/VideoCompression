@@ -19,7 +19,7 @@ uses
   UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings;
 
 const
-  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 1000;
+  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 500;
   FilterBase = 1;
 
 var
@@ -70,21 +70,10 @@ procedure WriteBASE;
 var
   f: TextFile;
   i, k: LongWord;
-  UniqCount, p: int64;
+  UniqCount: int64;
   FileName: shortstring;
 begin
   QuickSort;
-  p := 0;
-  for i := 1 to BASE_COUNT do
-    p := p + BASE[i].count;
-  i := 1;
-  while p >= UGlobal.FrameBaseSize do
-  begin
-    p := p - UGlobal.FrameBaseSize;
-    i := i + 1;
-  end;
-  if p <> 0 then
-    Sleep(1);
 
   k := 1;
   for i := 2 to BASE_COUNT do
@@ -100,19 +89,6 @@ begin
     if i <> k then
       BASE[i].count := 0;
   end;
-
-  p := 0;
-  i := 1;
-  while (BASE[i].count > 0) and (i <= BASE_COUNT) do
-  begin
-    p := p + BASE[i].count;
-    i := i + 1;
-  end;
-  i := 1;
-  while p >= UGlobal.FrameBaseSize do
-    p := p - UGlobal.FrameBaseSize;
-  if p <> 0 then
-    Sleep(1);
 
   FileName := USettings.FileName + '_' + GetRandomName + '.base';
   AssignFile(f, FileName);
@@ -451,26 +427,19 @@ end;
 
 procedure ProcessFrame;
 begin
-  // if FrameNum = 27962 then
-  begin
-    CopyFrame;
-    CreateFrame;
-
-    if USettings.NeedWindowFilter then
-      WindowFilter;
-    if USettings.NeedMedianFilter then
-      MedianFilter;
-
-    ShowResultFrame;
-    // SaveFrame(FrameNum);
-
-    case USettings.ElemBase of
-    FragBase: CreateLocalFragBase;
-    DiffBase: CreateLocalDiffBase;
-    end;
-
-    AddToBase;
+  CopyFrame;
+  CreateFrame;
+  if USettings.NeedWindowFilter then
+    WindowFilter;
+  if USettings.NeedMedianFilter then
+    MedianFilter;
+  ShowResultFrame;
+  // SaveFrame(FrameNum);
+  case USettings.ElemBase of
+  FragBase: CreateLocalFragBase;
+  DiffBase: CreateLocalDiffBase;
   end;
+  AddToBase;
   FrameNum := FrameNum + 1;
 end;
 

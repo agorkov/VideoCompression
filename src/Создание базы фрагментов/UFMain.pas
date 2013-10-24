@@ -66,6 +66,7 @@ var
   SegCount, SegNum: word;
   i: word;
 begin
+  //UProcess.WriteBase;
   if paramcount = 6 then
   begin
     USettings.FileName := ParamStr(1);

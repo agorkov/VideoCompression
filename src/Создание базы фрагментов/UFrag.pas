@@ -11,7 +11,7 @@ type
   // TCFrag = array [1..UGlobal.FragCSize] of byte;
   TRFrag = record
     frag: TFrag;
-    count: LongWord;
+    count: int64;
   end;
 
 function CompareFrag(f1, f2: TFrag): byte;
