@@ -11,6 +11,7 @@ var
 
 procedure ProcessFrame;
 procedure WriteBASE;
+procedure SealGlobalBase;
 function BaseFull: byte;
 
 implementation
@@ -19,7 +20,7 @@ uses
   UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings;
 
 const
-  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 500;
+  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 1000;
   FilterBase = 1;
 
 var
@@ -33,7 +34,7 @@ begin
   BaseFull := round(BASE_COUNT / MAX_BASE_COUNT * 100);
 end;
 
-procedure WriteBASE;
+procedure SealGlobalBase;
   procedure QuickSort;
     procedure sort(L, R: LongWord);
     var
@@ -68,10 +69,7 @@ procedure WriteBASE;
   end;
 
 var
-  f: TextFile;
   i, k: LongWord;
-  UniqCount: int64;
-  FileName: shortstring;
 begin
   QuickSort;
 
@@ -89,17 +87,25 @@ begin
     if i <> k then
       BASE[i].count := 0;
   end;
+  BASE_COUNT := k;
+end;
 
+procedure WriteBASE;
+
+var
+  f: TextFile;
+  i, k: LongWord;
+  UniqCount: int64;
+  FileName: shortstring;
+begin
   FileName := USettings.FileName + '_' + GetRandomName + '.base';
   AssignFile(f, FileName);
   rewrite(f);
   UniqCount := 0;
-  i := 1;
-  while (BASE[i].count > 0) and (i <= BASE_COUNT) do
+  for i := 1 to BASE_COUNT do
   begin
     writeln(f, UFrag.FragToString(BASE[i].frag), ' ', BASE[i].count);
     UniqCount := UniqCount + 1;
-    i := i + 1;
   end;
   UMergeList.AddPartBase(FileName, UniqCount);
   CloseFile(f);
@@ -346,7 +352,11 @@ var
   i: LongWord;
 begin
   if BASE_COUNT + UGlobal.FrameBaseSize > MAX_BASE_COUNT then
-    WriteBASE;
+  begin
+    SealGlobalBase;
+    if BASE_COUNT + UGlobal.FrameBaseSize > MAX_BASE_COUNT then
+      WriteBASE;
+  end;
   i := 1;
   while (FrameBase[i].count > 0) and (i <= UGlobal.FrameBaseSize) do
   begin
