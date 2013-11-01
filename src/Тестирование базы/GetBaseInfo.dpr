@@ -1,65 +1,125 @@
 program GetBaseInfo;
 
 {$APPTYPE CONSOLE}
-
 {$R *.res}
 
 uses
-  System.SysUtils,
-  UGlobal in '..\Shared units\UGlobal.pas';
+  System.SysUtils, UGlobal in '..\Shared units\UGlobal.pas', Math;
+
+const
+  FragSize = UGlobal.FragH * UGlobal.FragW * UGlobal.bpp;
+
+type
+  TPElem = ^TRElem;
+
+  TRElem = record
+    ID, count: int64;
+    next, prev: TPElem;
+  end;
 
 var
-FileName: string;
-f: TextFile;
-str: string[UGlobal.FragSize*bpp];
-Elem, Uniq, tmp: int64;
-entropy: double;
+  DLF, DLL: TPElem;
+
+procedure InsertBefore(elem: TPElem; newval: int64);
+var
+  NewElem, tmp: TPElem;
+begin
+  New(NewElem);
+  NewElem^.ID := newval;
+  NewElem^.count := 1;
+  tmp := elem^.prev;
+  tmp^.next := NewElem;
+  NewElem^.next := elem;
+  elem^.prev := NewElem;
+  NewElem^.prev := tmp;
+end;
+
+procedure InitList;
+begin
+  New(DLF);
+  New(DLL);
+  DLF^.ID := round(power(2, 32) - 1);
+  DLF^.count := 0;
+  DLF^.prev := nil;
+  DLF^.next := DLL;
+  DLL^.ID := round(power(2, 32) - 1);
+  DLL^.count := 0;
+  DLL^.prev := DLF;
+  DLL^.next := nil;
+end;
+
+procedure AddID(ID: int64);
+var
+  elem: TPElem;
+begin
+  elem := DLF^.next;
+  while (elem <> DLL) and (elem^.ID < ID) do
+    elem := elem^.next;
+  if elem^.ID = ID then
+    elem^.count := elem^.count + 1
+  else
+    InsertBefore(elem, ID);
+end;
+
+var
+  f: TextFile;
+  str: string[FragSize];
+  m, Uniq, All: int64;
+  entropy: double;
+  elem: TPElem;
+  FullMovie, Base, Codes: double;
+
 begin
   try
-    if paramcount=1 then
-      FileName:=paramstr(1)
-    else
+    InitList;
+    Uniq := 0;
+    All := 0;
+    AssignFile(f, Paramstr(1) + '.base');
+    reset(f);
+    while not EOF(f) do
     begin
-      write('Введите имя базы для проверки: ');
-      readln(FileName);
+      read(f, str);
+      readln(f, m);
+      AddID(m);
+      Uniq := Uniq + 1;
+      All := All + m;
+    end;
+    CloseFile(f);
+
+    elem := DLF^.next;
+    entropy := 0;
+    while elem <> DLL do
+    begin
+      entropy := entropy - elem^.ID / All * log2(elem^.ID / All);
+      elem := elem^.next;
     end;
 
-    Elem:=0; Uniq:=0;
-    AssignFile(f,FileName);
-    reset(f);
-      while not EOF(f) do
-      begin
-        read(f,str); readln(f,tmp);
-        Elem:=Elem+tmp;
-        Uniq:=Uniq+1;
-      end;
-    CloseFile(f);
-    writeln('Уникальных фрагментов - ', Uniq);
-    writeln('Всего фрагментов - ', Elem);
-    writeln('В базе хранится информация о ', Elem/(UGlobal.FrameBaseSize):1:2,' кадрах');
+    FullMovie := All * UGlobal.FragSize * UGlobal.bpp;
+    Base := Uniq * (FragSize * bpp + 2);
+    Codes := All * entropy;
 
-    entropy:=0;
-    reset(f);
-      while not EOF(f) do
-      begin
-        read(f,str); readln(f,tmp);
-        entropy:=entropy+(-tmp/Elem*(ln(tmp/Elem)/ln(2)));
-      end;
-    CloseFile(f);
-    writeln('Энтропия - '+FloatToStrF(entropy,ffFixed,7,7));
-
-    //FileName:='TR_'+FileName;
-    AssignFile(f,'result.txt');
-    if FileExists('result.txt') then
-      Append(f)
-    else
-      rewrite(f);
-
-    //delete(FileName,pos('.',FileName),length(FileName));
-    writeln(f,FileName+' '+inttostr(Elem)+' '+inttostr(Uniq)+' '+FloatToStrF(entropy,ffFixed,7,7));
+    AssignFile(f, Paramstr(1) + 'INFO.txt');
+    rewrite(f);
+    writeln(f, 'Файл                                   ', Paramstr(1));
+    writeln(f, 'Кадр                                   ', UGlobal.PicH, 'x', UGlobal.PicW);
+    writeln(f, 'Окно                                   ', UGlobal.FragH, 'x', UGlobal.FragW);
+    writeln(f, 'Бит на пиксел                          ', UGlobal.bpp);
+    writeln(f, 'Количество элементов в передаче        ', All, ' (', floattostrf(All * UGlobal.FragSize / (UGlobal.PicW * UGlobal.PicH), ffFixed, 8, 2), ' кадров)');
+    writeln(f, 'Количество уникальных элементов в базе ', Uniq);
+    writeln(f, 'Энтропия базы                          ', floattostrf(entropy, ffFixed, 3, 5));
+    writeln(f, 'Ожидаемая степень сжатия               ', floattostrf(FullMovie / (Base + Codes), ffFixed, 3, 5));
+    writeln(f, 'Доля базы в передаче                   ', floattostrf(Base / Codes, ffFixed, 3, 5));
+    writeln(f, 'Отношение размеров базы и фильма       ', floattostrf(Base / FullMovie, ffFixed, 3, 5));
+    elem := DLF^.next;
+    while elem <> DLL do
+    begin
+      writeln(f, elem^.ID, ' ', elem^.count);
+      elem := elem^.next;
+    end;
     CloseFile(f);
   except
     on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
+      writeln(E.ClassName, ': ', E.Message);
   end;
+
 end.

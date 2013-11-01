@@ -20,7 +20,7 @@ uses
   UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings;
 
 const
-  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 1000;
+  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 500;
   FilterBase = 1;
 
 var
