@@ -20,11 +20,11 @@ uses
   UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings;
 
 const
-  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 1000;
+  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 1500;
   FilterBase = 1;
 
 var
-  Frame, FrameOld: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
+  Frame, FrameOld: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of word;
   FrameBase: array [1 .. UGlobal.FrameBaseSize] of UFrag.TRFrag;
   BASE_COUNT: LongWord;
   BASE: array [1 .. MAX_BASE_COUNT] of TRFrag;
@@ -145,14 +145,14 @@ begin
       FrameOld[i, j] := Frame[i, j];
 end;
 
-function quantization(val: byte): byte;
+function quantization(val, L: byte): byte;
 begin
-  quantization := val div UGlobal.quantizationStep;
+  quantization := val div (256 div (1 shl L));
 end;
 
-function dequantization(val: byte): byte;
+function dequantization(val, L: byte): byte;
 begin
-  dequantization := val * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
+  dequantization := val * (256 div (1 shl L)) + (256 div (1 shl L)) div 2;
 end;
 
 procedure CreateFrame;
@@ -170,17 +170,11 @@ begin
       g := p[3 * j + 1];
       R := p[3 * j + 2];
 
-      case USettings.BaseColor of
-      USettings.RGB_R: val := R;
-      USettings.RGB_G: val := g;
-      USettings.RGB_B: val := b;
-      USettings.YIQ_Y: val := round(0.299 * R + 0.587 * g + 0.114 * b);
-      USettings.YIQ_I: val := round(0.596 * R + 0.274 * g + 0.321 * b);
-      USettings.YIQ_Q: val := round(0.211 * R + 0.523 * g + 0.311 * b);
-    else val := 0;
-      end;
+      R := quantization(R, 5);
+      g := quantization(g, 6);
+      b := quantization(b, 5);
 
-      Frame[i + 1, j + 1] := quantization(val);
+      Frame[i + 1, j + 1] := (R shl 11) + (g shl 5) + b;
     end;
   end;
 end;
@@ -189,7 +183,7 @@ procedure ShowResultFrame;
 var
   i, j: LongWord;
   pr: pByteArray;
-  val: byte;
+  R, g, b: byte;
 begin
   for i := 0 to UGlobal.PicH - 1 do
   begin
@@ -199,11 +193,17 @@ begin
       pr[3 * j] := 0;
       pr[3 * j + 1] := 0;
       pr[3 * j + 2] := 0;
-      val := dequantization(Frame[i + 1, j + 1]);
 
-      pr[3 * j] := val;
-      pr[3 * j + 1] := val;
-      pr[3 * j + 2] := val;
+      b := (Frame[i + 1, j + 1] and 31);
+      b:=dequantization(b,5);
+      g := (Frame[i + 1, j + 1] and 2016) shr 5;
+      g:=dequantization(g,6);
+      R := (Frame[i + 1, j + 1] and 63488) shr 11;
+      r:=dequantization(r,5);
+
+      pr[3 * j] := b;
+      pr[3 * j + 1] := g;
+      pr[3 * j + 2] := R;
     end;
   end;
   UFMain.FMain.Image1.Picture.Bitmap := BMR;

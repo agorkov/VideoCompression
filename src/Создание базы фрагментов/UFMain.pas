@@ -66,7 +66,7 @@ var
   SegCount, SegNum: word;
   i: word;
 begin
-  if paramcount = 6 then
+  if paramcount = 5 then
   begin
     USettings.FileName := ParamStr(1);
     FMain.Caption := USettings.FileName;
@@ -83,32 +83,20 @@ begin
       FMain.Caption := FMain.Caption + ' ' + 'פנאדלוםעמג';
     end;
 
-    FMain.Caption := FMain.Caption + ' ' + ParamStr(3);
-    if ParamStr(3) = 'RGB.R' then
-      USettings.BaseColor := RGB_R;
-    if ParamStr(3) = 'RGB.G' then
-      USettings.BaseColor := RGB_G;
-    if ParamStr(3) = 'RGB.B' then
-      USettings.BaseColor := RGB_B;
-    if ParamStr(3) = 'YIQ.Y' then
-      USettings.BaseColor := YIQ_Y;
-    if ParamStr(3) = 'YIQ.I' then
-      USettings.BaseColor := USettings.YIQ_I;
-    if ParamStr(3) = 'YIQ.Q' then
-      USettings.BaseColor := YIQ_Q;
+    FMain.Caption := FMain.Caption + ' HighColor ';
 
     TrackBar2.Max := UGlobal.FragSize;
     TrackBar2.Position := 1;
     CBWindowsFilter.Checked := false;
-    if pos('+W', ParamStr(4)) = 1 then
+    if pos('+W', ParamStr(3)) = 1 then
     begin
       CBWindowsFilter.Checked := true;
-      TrackBar2.Position := strtoint(copy(ParamStr(4), 3, length(ParamStr(4))));
+      TrackBar2.Position := strtoint(copy(ParamStr(4), 3, length(ParamStr(3))));
     end;
 
-    if ParamStr(5) = '+M' then
+    if ParamStr(4) = '+M' then
       CBMedianFilter.Checked := true;
-    if ParamStr(5) = '-M' then
+    if ParamStr(4) = '-M' then
       CBMedianFilter.Checked := false;
   end;
 
@@ -148,7 +136,7 @@ begin
     SealGlobalBase;
     UProcess.WriteBase;
   end;
-  USettings.FileName := ParamStr(6);
+  USettings.FileName := ParamStr(5);
   UMergeList.MergePartBaseList;
 
   FMain.Close;

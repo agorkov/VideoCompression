@@ -6,9 +6,8 @@ uses
   UGlobal;
 
 type
-  TFrag = array [1 .. UGlobal.FragSize] of byte;
+  TFrag = array [1 .. UGlobal.FragSize] of word;
 
-  // TCFrag = array [1..UGlobal.FragCSize] of byte;
   TRFrag = record
     frag: TFrag;
     count: int64;

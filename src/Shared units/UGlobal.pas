@@ -9,8 +9,8 @@ const
   PicW = 640;
   PicH = 480;
   FrameBaseSize = PicH * PicW div FragSize;
-  bpp = 4;
-  quantizationStep = 256 div (1 shl UGlobal.bpp);
+  bpp = 16;
+  quantizationStep = 256 div (1 shl 5);
 
 implementation
 

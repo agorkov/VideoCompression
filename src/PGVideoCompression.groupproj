@@ -12,9 +12,6 @@
 			<Projects Include="Слияние баз\MergeBases.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="Предварительный просмотр\Preview.dproj">
-				<Dependencies/>
-			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -50,23 +47,14 @@
 		<Target Name="MergeBases:Make">
 			<MSBuild Projects="Слияние баз\MergeBases.dproj" Targets="Make"/>
 		</Target>
-		<Target Name="Preview">
-			<MSBuild Projects="Предварительный просмотр\Preview.dproj"/>
-		</Target>
-		<Target Name="Preview:Clean">
-			<MSBuild Projects="Предварительный просмотр\Preview.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="Preview:Make">
-			<MSBuild Projects="Предварительный просмотр\Preview.dproj" Targets="Make"/>
-		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="GetBase;GetBaseInfo;MergeBases;Preview"/>
+			<CallTarget Targets="GetBase;GetBaseInfo;MergeBases"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="GetBase:Clean;GetBaseInfo:Clean;MergeBases:Clean;Preview:Clean"/>
+			<CallTarget Targets="GetBase:Clean;GetBaseInfo:Clean;MergeBases:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="GetBase:Make;GetBaseInfo:Make;MergeBases:Make;Preview:Make"/>
+			<CallTarget Targets="GetBase:Make;GetBaseInfo:Make;MergeBases:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>
