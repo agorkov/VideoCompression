@@ -7,7 +7,7 @@ uses
   System.SysUtils, UGlobal in '..\Shared units\UGlobal.pas', Math;
 
 const
-  FragSize = UGlobal.FragH * UGlobal.FragW * UGlobal.bpp;
+  FragLength = UGlobal.FragH * UGlobal.FragW * UGlobal.bpp;
 
 type
   TPElem = ^TRElem;
@@ -63,9 +63,9 @@ end;
 
 var
   f: TextFile;
-  str: string[FragSize];
+  str: string[FragLength];
   m, Uniq, All: int64;
-  entropy: double;
+  P_i, entropy: double;
   elem: TPElem;
   FullMovie, Base, Codes: double;
 
@@ -85,17 +85,19 @@ begin
       All := All + m;
     end;
     CloseFile(f);
+    writeln('Данные считаны. Вычисление энтропии...');
 
     elem := DLF^.next;
     entropy := 0;
     while elem <> DLL do
     begin
-      entropy := entropy - elem^.ID / All * log2(elem^.ID / All);
+      P_i := elem^.ID / All;
+      entropy := entropy - P_i * log2(P_i) * elem^.count;
       elem := elem^.next;
     end;
 
     FullMovie := All * UGlobal.FragSize * UGlobal.bpp;
-    Base := Uniq * (FragSize * bpp + 2);
+    Base := Uniq * (UGlobal.FragSize * bpp + 2);
     Codes := All * entropy;
 
     AssignFile(f, Paramstr(1) + 'INFO.txt');
@@ -108,7 +110,7 @@ begin
     writeln(f, 'Количество уникальных элементов в базе ', Uniq);
     writeln(f, 'Энтропия базы                          ', floattostrf(entropy, ffFixed, 3, 5));
     writeln(f, 'Ожидаемая степень сжатия               ', floattostrf(FullMovie / (Base + Codes), ffFixed, 3, 5));
-    writeln(f, 'Доля базы в передаче                   ', floattostrf(Base / Codes, ffFixed, 3, 5));
+    writeln(f, 'Доля базы в передаче                   ', floattostrf(Base / (Base + Codes), ffFixed, 3, 5));
     writeln(f, 'Отношение размеров базы и фильма       ', floattostrf(Base / FullMovie, ffFixed, 3, 5));
     elem := DLF^.next;
     while elem <> DLL do
@@ -123,3 +125,4 @@ begin
   end;
 
 end.
+
