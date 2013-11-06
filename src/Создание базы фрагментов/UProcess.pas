@@ -20,14 +20,14 @@ uses
   UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings;
 
 const
-  MAX_BASE_COUNT = UGlobal.FrameBaseSize * 500;
+  MAX_BASE_COUNT = 150000000;
   FilterBase = 1;
 
 var
   Frame, FrameOld: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
   FrameBase: array [1 .. UGlobal.FrameBaseSize] of UFrag.TRFrag;
   BASE_COUNT: LongWord;
-  BASE: array [1 .. MAX_BASE_COUNT] of TRFrag;
+  GlobalBase: array [1 .. MAX_BASE_COUNT] of TPRFrag;
 
 function BaseFull: byte;
 begin
@@ -43,17 +43,17 @@ procedure SealGlobalBase;
     begin
       i := L;
       j := R;
-      x := BASE[(L + R) div 2];
+      x := GlobalBase[(L + R) div 2]^;
       repeat
-        while UFrag.CompareFrag(BASE[i].frag, x.frag) = 0 do
+        while UFrag.CompareFrag(GlobalBase[i]^.frag, x.frag) = 0 do
           i := i + 1;
-        while UFrag.CompareFrag(x.frag, BASE[j].frag) = 0 do
+        while UFrag.CompareFrag(x.frag, GlobalBase[j]^.frag) = 0 do
           j := j - 1;
         if i <= j then
         begin
-          w := BASE[i];
-          BASE[i] := BASE[j];
-          BASE[j] := w;
+          w := GlobalBase[i]^;
+          GlobalBase[i]^ := GlobalBase[j]^;
+          GlobalBase[j]^ := w;
           i := i + 1;
           j := j - 1;
         end;
@@ -76,16 +76,20 @@ begin
   k := 1;
   for i := 2 to BASE_COUNT do
   begin
-    if UFrag.CompareFrag(BASE[i].frag, BASE[k].frag) = 1 then
-      BASE[k].count := BASE[k].count + BASE[i].count
+    if UFrag.CompareFrag(GlobalBase[i]^.frag, GlobalBase[k]^.frag) = 1 then
+      GlobalBase[k]^.count := GlobalBase[k]^.count + GlobalBase[i]^.count
     else
     begin
       k := k + 1;
-      BASE[k].frag := BASE[i].frag;
-      BASE[k].count := BASE[i].count;
+      GlobalBase[k] := new(UFrag.TPRFrag);
+      GlobalBase[k]^.frag := GlobalBase[i]^.frag;
+      GlobalBase[k]^.count := GlobalBase[i]^.count;
     end;
     if i <> k then
-      BASE[i].count := 0;
+    begin
+      dispose(GlobalBase[i]);
+      GlobalBase[i] := nil;
+    end;
   end;
   BASE_COUNT := k;
 end;
@@ -94,7 +98,7 @@ procedure WriteBASE;
 
 var
   f: TextFile;
-  i, k: LongWord;
+  i: LongWord;
   UniqCount: int64;
   FileName: shortstring;
 begin
@@ -104,14 +108,17 @@ begin
   UniqCount := 0;
   for i := 1 to BASE_COUNT do
   begin
-    writeln(f, UFrag.FragToString(BASE[i].frag), ' ', BASE[i].count);
+    writeln(f, UFrag.FragToString(GlobalBase[i]^.frag), ' ', GlobalBase[i]^.count);
     UniqCount := UniqCount + 1;
   end;
   UMergeList.AddPartBase(FileName, UniqCount);
   CloseFile(f);
 
   for i := 1 to BASE_COUNT do
-    BASE[i].count := 0;
+  begin
+    dispose(GlobalBase[i]);
+    GlobalBase[i] := nil;
+  end;
   BASE_COUNT := 0;
 end;
 
@@ -123,7 +130,9 @@ begin
   FilterThresold := 25;
 
   for i := 1 to MAX_BASE_COUNT do
-    BASE[i].count := 0;
+  begin
+    GlobalBase[i] := nil;
+  end;
 
   for i := 1 to UGlobal.FrameBaseSize do
     FrameBase[i].count := 0;
@@ -361,8 +370,9 @@ begin
   while (FrameBase[i].count > 0) and (i <= UGlobal.FrameBaseSize) do
   begin
     BASE_COUNT := BASE_COUNT + 1;
-    BASE[BASE_COUNT].frag := FrameBase[i].frag;
-    BASE[BASE_COUNT].count := FrameBase[i].count;
+    GlobalBase[BASE_COUNT] := new(UFrag.TPRFrag);
+    GlobalBase[BASE_COUNT]^.frag := FrameBase[i].frag;
+    GlobalBase[BASE_COUNT]^.count := FrameBase[i].count;
     i := i + 1;
   end;
   for i := 1 to UGlobal.FrameBaseSize do

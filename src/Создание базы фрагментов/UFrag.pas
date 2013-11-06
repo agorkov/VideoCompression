@@ -8,7 +8,8 @@ uses
 type
   TFrag = array [1 .. UGlobal.FragSize] of byte;
 
-  // TCFrag = array [1..UGlobal.FragCSize] of byte;
+  TPRFrag = ^TRFrag;
+
   TRFrag = record
     frag: TFrag;
     count: int64;
