@@ -354,7 +354,7 @@ begin
   if BASE_COUNT + UGlobal.FrameBaseSize > MAX_BASE_COUNT then
   begin
     SealGlobalBase;
-    if BASE_COUNT + UGlobal.FrameBaseSize > MAX_BASE_COUNT then
+    if BaseFull >= 90 then
       WriteBASE;
   end;
   i := 1;
