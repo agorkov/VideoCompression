@@ -146,12 +146,8 @@ begin
 end;
 
 procedure CopyFrame;
-var
-  i, j: LongWord;
 begin
-  for i := 1 to UGlobal.PicH do
-    for j := 1 to UGlobal.PicW do
-      FrameOld[i, j] := Frame[i, j];
+  FrameOld := Frame;
 end;
 
 function quantization(val: byte): byte;
@@ -167,7 +163,6 @@ end;
 procedure CreateFrame;
 var
   i, j: LongWord;
-  R, g, b, val: byte;
   p: pByteArray;
 begin
   for i := 0 to UGlobal.PicH - 1 do
@@ -175,21 +170,18 @@ begin
     p := BM.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-      b := p[3 * j];
-      g := p[3 * j + 1];
-      R := p[3 * j + 2];
-
       case USettings.BaseColor of
-      USettings.RGB_R: val := R;
-      USettings.RGB_G: val := g;
-      USettings.RGB_B: val := b;
-      USettings.YIQ_Y: val := round(0.299 * R + 0.587 * g + 0.114 * b);
-      USettings.YIQ_I: val := round(0.596 * R + 0.274 * g + 0.321 * b);
-      USettings.YIQ_Q: val := round(0.211 * R + 0.523 * g + 0.311 * b);
-    else val := 0;
+      USettings.RGB_R: Frame[i + 1, j + 1] := quantization(p[3 * j + 2]);
+      USettings.RGB_G: Frame[i + 1, j + 1] := quantization(p[3 * j + 1]);
+      USettings.RGB_B: Frame[i + 1, j + 1] := quantization(p[3 * j]);
+      USettings.YIQ_Y: Frame[i + 1, j + 1] := quantization(round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]));
+      USettings.YIQ_I: Frame[i + 1, j + 1] := quantization(round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]));
+      USettings.YIQ_Q: Frame[i + 1, j + 1] := quantization(round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]));
+    else
+      begin
+        Halt;
       end;
-
-      Frame[i + 1, j + 1] := quantization(val);
+      end;
     end;
   end;
 end;
@@ -205,19 +197,13 @@ begin
     pr := BMR.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-      pr[3 * j] := 0;
-      pr[3 * j + 1] := 0;
-      pr[3 * j + 2] := 0;
       val := dequantization(Frame[i + 1, j + 1]);
-
       pr[3 * j] := val;
       pr[3 * j + 1] := val;
       pr[3 * j + 2] := val;
     end;
   end;
   UFMain.FMain.Image1.Picture.Bitmap := BMR;
-  if UFMain.FMain.CBSaveResults.Checked then
-    UFMain.FMain.Image1.Picture.SaveToFile(inttostr(FrameNum) + '.bmp');
 end;
 
 procedure SaveFrame(FrameNum: LongWord);
@@ -292,9 +278,7 @@ end;
 
 procedure CreateLocalDiffBase;
 var
-  i, j, k, L, R, c, p: LongWord;
-  str, strOld: UFrag.TFrag;
-  frag, fragOld: UFrag.TFrag;
+  i, j, k, R, c, p: LongWord;
 begin
   i := 1;
   j := 1;
@@ -307,15 +291,10 @@ begin
       for R := i to i + (UGlobal.FragH - 1) do
         for c := j to j + (UGlobal.FragW - 1) do
         begin
-          str[p] := Frame[R, c];
-          strOld[p] := FrameOld[R, c];
+          FrameBase[k].frag[p] := Frame[R, c] xor FrameOld[R, c];
           p := p + 1;
         end;
-      frag := str;
-      fragOld := strOld;
-      for L := 1 to UGlobal.FragSize do
-        frag[L] := frag[L] xor fragOld[L];
-      FrameBase[k].frag := frag;
+
       FrameBase[k].count := 1;
       k := k + 1;
       j := j + UGlobal.FragW;
@@ -329,7 +308,6 @@ end;
 procedure CreateLocalFragBase;
 var
   i, j, k, R, c, p: LongWord;
-  frag: UFrag.TFrag;
 begin
   i := 1;
   j := 1;
@@ -342,10 +320,9 @@ begin
       for R := i to i + (UGlobal.FragH - 1) do
         for c := j to j + (UGlobal.FragW - 1) do
         begin
-          frag[p] := Frame[R, c];
+          FrameBase[k].frag[p] := Frame[R, c];
           p := p + 1;
         end;
-      FrameBase[k].frag := frag;
       FrameBase[k].count := 1;
       k := k + 1;
       j := j + UGlobal.FragW;
