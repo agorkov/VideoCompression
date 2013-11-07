@@ -17,7 +17,7 @@ function BaseFull: byte;
 implementation
 
 uses
-  UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings;
+  UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings, Classes;
 
 const
   MAX_BASE_COUNT = 150000000;
@@ -97,22 +97,23 @@ end;
 procedure WriteBASE;
 
 var
-  f: TextFile;
   i: LongWord;
   UniqCount: int64;
   FileName: shortstring;
+  FS: TFIleStream;
 begin
   FileName := USettings.FileName + '_' + GetRandomName + '.base';
-  AssignFile(f, FileName);
-  rewrite(f);
+  FS := TFIleStream.Create(FileName, fmCreate);
+
   UniqCount := 0;
   for i := 1 to BASE_COUNT do
   begin
-    writeln(f, UFrag.FragToString(GlobalBase[i]^.frag), ' ', GlobalBase[i]^.count);
+    FS.Write(GlobalBase[i]^, SizeOf(UFrag.TRFrag));
+    // writeln(f, UFrag.FragToString(GlobalBase[i]^.frag), ' ', GlobalBase[i]^.count);
     UniqCount := UniqCount + 1;
   end;
   UMergeList.AddPartBase(FileName, UniqCount);
-  CloseFile(f);
+  FS.Free;
 
   for i := 1 to BASE_COUNT do
   begin

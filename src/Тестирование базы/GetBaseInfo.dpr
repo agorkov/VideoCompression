@@ -1,10 +1,14 @@
-                                       program GetBaseInfo;
+program GetBaseInfo;
 
 {$APPTYPE CONSOLE}
 {$R *.res}
 
 uses
-  System.SysUtils, UGlobal in '..\Shared units\UGlobal.pas', Math;
+  System.SysUtils,
+  UGlobal in '..\Shared units\UGlobal.pas',
+  Math,
+  Classes,
+  UFrag in '..\Shared units\UFrag.pas';
 
 const
   FragLength = UGlobal.FragH * UGlobal.FragW * UGlobal.bpp;
@@ -62,7 +66,9 @@ begin
 end;
 
 var
+  FS: TFileStream;
   f: TextFile;
+  tmpFrag: TRFrag;
   str: string[FragLength];
   m, Uniq, All: int64;
   P_i, entropy: double;
@@ -74,17 +80,17 @@ begin
     InitList;
     Uniq := 0;
     All := 0;
-    AssignFile(f, Paramstr(1) + '.base');
-    reset(f);
-    while not EOF(f) do
+    FS := TFileStream.Create(Paramstr(1) + '.base', fmOpenRead);
+
+    while not(FS.Position >= FS.Size) do
     begin
-      read(f, str);
-      readln(f, m);
+      FS.Read(tmpFrag, sizeof(TRFrag));
+      m := tmpFrag.count;
       AddID(m);
       Uniq := Uniq + 1;
       All := All + m;
     end;
-    CloseFile(f);
+    FS.Free;
     writeln('Данные считаны. Вычисление энтропии...');
 
     elem := DLF^.next;
@@ -125,4 +131,3 @@ begin
   end;
 
 end.
-

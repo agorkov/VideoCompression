@@ -2,116 +2,100 @@ unit UMerge;
 
 interface
 
-function Merge(f1n,f2n,fbn: shortstring; EraseFiles: boolean): int64;
+function Merge(f1n, f2n, fbn: shortstring; EraseFiles: boolean): int64;
 
 implementation
 
 uses
-  UGlobal;
-
-type
-  TRFrag = record
-    frag: string[UGlobal.FragSize*bpp];
-    q: Int64;
-  end;
+  UGlobal, Classes, System.SysUtils, UFrag;
 
 var
-f1,f2,fb: TextFile;
-fl1,fl2: boolean;
-frag1,frag2,frag: TRFrag;
-c1,c2,cb,uniq: Int64;
+  f1, f2, fb: TFileStream;
+  fl1, fl2: boolean;
+  frag1, frag2, frag: TRFrag;
+  c1, c2, cb, uniq: int64;
 
-procedure ReadFragment(var _file: TextFile; var F: TRFrag; var Count: int64);
+procedure ReadFragment(var _FS: TFileStream; var F: TRFrag; var Count: int64);
 begin
-  read(_file,F.frag);
-  readln(_file,F.q);
-  Count:=Count+F.q;
+  _FS.Read(F, sizeof(TRFrag));
+  Count := Count + F.Count;
 end;
 
-procedure CreateFragment(var Frag1,Frag2,F: TRFrag; var fl1,fl2: boolean);
+procedure CreateFragment(var frag1, frag2, F: TRFrag; var fl1, fl2: boolean);
 begin
-  F.frag:=''; F.q:=0;
-  if Frag1.frag<Frag2.frag then
+  if UFrag.CompareFrag(frag1.frag, frag2.frag) = 0 then
   begin
-    F.frag:=Frag1.frag;
-    F.q:=Frag1.q;
-    fl1:=true;
-    fl2:=false;
+    F.frag := frag1.frag;
+    F.Count := frag1.Count;
+    fl1 := true;
+    fl2 := false;
   end;
-  if Frag1.frag=Frag2.frag then
+  if UFrag.CompareFrag(frag1.frag, frag2.frag) = 1 then
   begin
-    F.frag:=Frag1.frag;
-    F.q:=Frag1.q+Frag2.q;
-    fl1:=true;
-    fl2:=true;
+    F.frag := frag1.frag;
+    F.Count := frag1.Count + frag2.Count;
+    fl1 := true;
+    fl2 := true;
   end;
-  if Frag1.frag>Frag2.frag then
+  if UFrag.CompareFrag(frag1.frag, frag2.frag) = 2 then
   begin
-    F.frag:=Frag2.frag;
-    F.q:=Frag2.q;
-    fl1:=false;
-    fl2:=true;
+    F.frag := frag2.frag;
+    F.Count := frag2.Count;
+    fl1 := false;
+    fl2 := true;
   end;
-  if F.frag=frag1.frag then
-  begin
-    frag1.frag:='z';
-    frag1.q:=0;
-  end;
-  if F.frag=frag2.frag then
-  begin
-    frag2.frag:='z';
-    frag2.q:=0;
-  end;
+  if UFrag.CompareFrag(F.frag, frag1.frag) = 1 then
+    frag1.Count := 0;
+  if UFrag.CompareFrag(F.frag, frag2.frag) = 1 then
+    frag2.Count := 0;
 end;
 
 procedure WriteFragment(F: TRFrag; var Count: int64);
 begin
-  writeln(fb,F.frag,' ',F.q);
-  Count:=Count+F.q;
-  uniq:=uniq+1;
+  fb.Write(F, sizeof(TRFrag));
+  Count := Count + F.Count;
+  uniq := uniq + 1;
 end;
 
-function Merge(f1n,f2n,fbn: shortstring; EraseFiles: boolean): int64;
+function Merge(f1n, f2n, fbn: shortstring; EraseFiles: boolean): int64;
 begin
-  c1:=0; c2:=0; cb:=0; uniq:=0;
+  c1 := 0;
+  c2 := 0;
+  cb := 0;
+  uniq := 0;
 
-  Assign(f1,string(f1n)); reset(f1);
-  Assign(f2,string(f2n)); reset(f2);
-  Assign(fb,string(fbn)); rewrite(fb);
+  f1 := TFileStream.Create(string(f1n), fmOpenRead);
+  f2 := TFileStream.Create(string(f2n), fmOpenRead);
+  fb := TFileStream.Create(string(fbn), fmCreate);
 
-  fl1:=true; fl2:=true;
-  while (not EOF(f1)) or (not EOF(f2)) do
+  fl1 := true;
+  fl2 := true;
+  while (not(f1.Position >= f1.Size)) or (not(f2.Position >= f2.Size)) do
   begin
     if fl1 then
-      ReadFragment(f1,frag1,c1);
+      ReadFragment(f1, frag1, c1);
     if fl2 then
-      ReadFragment(f2,frag2,c2);
-    CreateFragment(frag1,frag2,frag,fl1,fl2);
-    WriteFragment(frag,cb);
-    if EOF(f1) then
-      fl1:=false;
-    if EOF(f2) then
-      fl2:=false;
+      ReadFragment(f2, frag2, c2);
+    CreateFragment(frag1, frag2, frag, fl1, fl2);
+    WriteFragment(frag, cb);
+    if f1.Position >= f1.Size then
+      fl1 := false;
+    if f2.Position >= f2.Size then
+      fl2 := false;
   end;
 
-  CreateFragment(frag1,frag2,frag,fl1,fl2);
-  if frag.frag<>'z' then
-    WriteFragment(frag,cb);
-  CreateFragment(frag1,frag2,frag,fl1,fl2);
-  if frag.frag<>'z' then
-    WriteFragment(frag,cb);
+  CreateFragment(frag1, frag2, frag, fl1, fl2);
+  if frag.Count = 0 then
+    WriteFragment(frag, cb);
+  CreateFragment(frag1, frag2, frag, fl1, fl2);
+  if frag.Count = 0 then
+    WriteFragment(frag, cb);
 
-  CloseFile(f1);
-  CloseFile(f2);
-  CloseFile(fb);
+  f1.Free;
+  f2.Free;
+  fb.Free;
 
-  if (cb=(c1+c2)) and (EraseFiles) then
-  begin
-    Erase(f1);
-    Erase(f2);
-  end;
-
-  Merge:=uniq;
+  Merge := uniq;
 end;
 
 end.

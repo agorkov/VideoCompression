@@ -7,7 +7,8 @@ program MergeBases;
 uses
   System.SysUtils,
   UGlobal in '..\Shared units\UGlobal.pas',
-  UMerge in '..\Shared units\UMerge.pas';
+  UMerge in '..\Shared units\UMerge.pas',
+  UFrag in '..\Shared units\UFrag.pas';
 
 type
   TBase = record

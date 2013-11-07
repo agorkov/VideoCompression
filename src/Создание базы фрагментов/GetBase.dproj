@@ -89,7 +89,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-			<Debugger_RunParams>TOS1x01 d RGB.R -W -M tmpTOS1x01_3x2_5-W-M_RGB.R</Debugger_RunParams>
+			<Debugger_RunParams>TOS1x01 d RGB.R -W -M TOS1x01</Debugger_RunParams>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<Debugger_RunParams>TOS1x01 d RGB.R -W -M TOS1x01.RGB.R</Debugger_RunParams>
@@ -120,10 +120,10 @@
 			</DCCReference>
 			<DCCReference Include="UProcess.pas"/>
 			<DCCReference Include="..\Shared units\UGlobal.pas"/>
-			<DCCReference Include="UFrag.pas"/>
 			<DCCReference Include="..\Shared units\UMerge.pas"/>
 			<DCCReference Include="UMergeList.pas"/>
 			<DCCReference Include="USettings.pas"/>
+			<DCCReference Include="..\Shared units\UFrag.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
