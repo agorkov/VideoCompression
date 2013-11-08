@@ -3,6 +3,7 @@ unit UMerge;
 interface
 
 function Merge(f1n, f2n, fbn: shortstring; EraseFiles: boolean): int64;
+function GetRandomName(len: byte): shortstring;
 
 implementation
 
@@ -64,9 +65,9 @@ begin
   cb := 0;
   uniq := 0;
 
-  f1 := TFileStream.Create(string(f1n)+'.base', fmOpenRead);
-  f2 := TFileStream.Create(string(f2n)+'.base', fmOpenRead);
-  fb := TFileStream.Create(string(fbn)+'.base', fmCreate);
+  f1 := TFileStream.Create(string(f1n) + '.base', fmOpenRead);
+  f2 := TFileStream.Create(string(f2n) + '.base', fmOpenRead);
+  fb := TFileStream.Create(string(fbn) + '.base', fmCreate);
 
   fl1 := true;
   fl2 := true;
@@ -97,11 +98,23 @@ begin
 
   if (cb = (c1 + c2)) and (EraseFiles) then
   begin
-    DeleteFile(f1n+'.base');
-    DeleteFile(f2n+'.base');
+    DeleteFile(f1n + '.base');
+    DeleteFile(f2n + '.base');
   end;
 
   Merge := uniq;
+end;
+
+function GetRandomName(len: byte): shortstring;
+var
+  i: byte;
+  R: shortstring;
+begin
+  Randomize;
+  R := '';
+  for i := 1 to len do
+    R := R + shortstring(chr(65 + random(26)));
+  GetRandomName := R;
 end;
 
 end.

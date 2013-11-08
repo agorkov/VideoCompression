@@ -17,7 +17,7 @@ function BaseFull: byte;
 implementation
 
 uses
-  UGlobal, UFrag, UMergeList, SysUtils, Windows, UFMain, USettings, Classes;
+  UGlobal, UFrag, UMergeList, UMerge, SysUtils, Windows, UFMain, USettings, Classes;
 
 const
   MAX_BASE_COUNT = 150000000;
@@ -102,7 +102,7 @@ var
   FileName: shortstring;
   FS: TFIleStream;
 begin
-  FileName := USettings.FileName + '_' + GetRandomName + '.base';
+  FileName := USettings.FileName + '_' + GetRandomName(10) + '.base';
   FS := TFIleStream.Create(FileName, fmCreate);
 
   UniqCount := 0;

@@ -4,7 +4,6 @@ interface
 
 procedure AddPartBase(FileName: shortString; FragCount: int64);
 procedure MergePartBaseList;
-function GetRandomName: shortString;
 
 implementation
 
@@ -22,18 +21,6 @@ type
 var
   PBList: TARPartBaseList;
   PartBaseCount: word;
-
-function GetRandomName: shortString;
-var
-  i: byte;
-  R: shortstring;
-begin
-  Randomize;
-  R := '';
-  for i := 1 to 10 do
-    R := R + shortstring(chr(65 + random(26)));
-  GetRandomName := R;
-end;
 
 procedure AddPartBase(FileName: shortString; FragCount: int64);
 begin
@@ -66,7 +53,7 @@ begin
     SortList;
     b1n := PBList[PartBaseCount - 1].PartBaseName;
     b2n := PBList[PartBaseCount].PartBaseName;
-    brn := USettings.FileName + '_' + GetRandomName + '.base';
+    brn := USettings.FileName + '_' + GetRandomName(10) + '.base';
     PBList[PartBaseCount].PartBaseName := '';
     PBList[PartBaseCount].FragCount := 0;
     PBList[PartBaseCount - 1].PartBaseName := brn;

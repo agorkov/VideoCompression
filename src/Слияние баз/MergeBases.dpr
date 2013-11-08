@@ -22,7 +22,7 @@ var
 begin
   Uniq := 0;
   f := TFileStream.Create(BaseName, fmOpenRead);
-  Uniq:=F.Size div sizeof(TRFrag);
+  Uniq := f.Size div sizeof(TRFrag);
   f.Free;
   GetUniqCount := Uniq;
 end;
@@ -42,14 +42,11 @@ begin
       end;
 end;
 
-const
-  MergePrefix = 'mergetemp';
-
 var
   BL: TBaseList;
   BC: word;
   i: word;
-  tmpname: string;
+  MergePrefix, tmpname: string;
 
 begin
   try
@@ -60,16 +57,18 @@ begin
       begin
         writeln('Загрузка информации о базе: ', paramstr(i));
         BL[i].BaseName := paramstr(i);
-        BL[i].Uniq := GetUniqCount(paramstr(i));
+        BL[i].Uniq := GetUniqCount(paramstr(i) + '.base');
         writeln(BL[i].BaseName, ' ', BL[i].Uniq);
       end;
     end;
+
+    MergePrefix := GetRandomName(15);
 
     i := 0;
     while BC > 1 do
     begin
       i := i + 1;
-      tmpname := MergePrefix + inttostr(i) + '.base';
+      tmpname := MergePrefix + inttostr(i);
       Sort(BL, BC);
       writeln('Начат процесс слияния: ', BL[BC - 1].BaseName, ' (', BL[BC - 1].Uniq, ') и ', BL[BC].BaseName, ' (', BL[BC].Uniq, ')');
       BL[BC - 1].Uniq := UMerge.Merge(BL[BC - 1].BaseName, BL[BC].BaseName, tmpname, false);
@@ -79,7 +78,7 @@ begin
       BL[BC].Uniq := 0;
       BC := BC - 1;
     end;
-    RenameFile(BL[1].BaseName, paramstr(ParamCount));
+    RenameFile(BL[1].BaseName + '.base', paramstr(ParamCount) + '.base');
     for i := 1 to ParamCount do
       if FileExists(MergePrefix + inttostr(i) + '.base') then
         DeleteFile(MergePrefix + inttostr(i) + '.base');
