@@ -79,7 +79,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<Debugger_RunParams>TOS1x01.base TOS1x02.base TOS1x03.base TOS1x04.base TOS1x05.base TOS1x06.base TOS1x07.base TOS1x08.base TOS1x09.base TOS1x10.base TOS1x11.base TOS1x12.base TOS1x13.base TOS1x14.base TOS1x15.base TOS1x16.base TOS1x17.base TOS1x18.base TOS1x19.base TOS1x20.base TOS1x21.base TOS1x22.base TOS1x23.base TOS1x24.base TOS1x25.base TOS1x26.base TOS1x27.base TOS1x28.base TOS1x29.base</Debugger_RunParams>
+			<Debugger_RunParams>1.base 2.base 3.base 4.base 5.base 6.base 7.base 8.base 9.base ALL.base</Debugger_RunParams>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>

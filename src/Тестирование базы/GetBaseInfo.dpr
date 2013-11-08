@@ -1,3 +1,4 @@
+
 program GetBaseInfo;
 
 {$APPTYPE CONSOLE}
@@ -106,7 +107,7 @@ begin
     Base := Uniq * (UGlobal.FragSize * bpp + 2);
     Codes := All * entropy;
 
-    AssignFile(f, Paramstr(1) + 'INFO.txt');
+    AssignFile(f, Paramstr(1) + '.txt');
     rewrite(f);
     writeln(f, 'Файл                                   ', Paramstr(1));
     writeln(f, 'Кадр                                   ', UGlobal.PicH, 'x', UGlobal.PicW);

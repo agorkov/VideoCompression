@@ -64,9 +64,9 @@ begin
   cb := 0;
   uniq := 0;
 
-  f1 := TFileStream.Create(string(f1n), fmOpenRead);
-  f2 := TFileStream.Create(string(f2n), fmOpenRead);
-  fb := TFileStream.Create(string(fbn), fmCreate);
+  f1 := TFileStream.Create(string(f1n)+'.base', fmOpenRead);
+  f2 := TFileStream.Create(string(f2n)+'.base', fmOpenRead);
+  fb := TFileStream.Create(string(fbn)+'.base', fmCreate);
 
   fl1 := true;
   fl2 := true;
@@ -85,15 +85,21 @@ begin
   end;
 
   CreateFragment(frag1, frag2, frag, fl1, fl2);
-  if frag.Count = 0 then
+  if frag.Count <> 0 then
     WriteFragment(frag, cb);
   CreateFragment(frag1, frag2, frag, fl1, fl2);
-  if frag.Count = 0 then
+  if frag.Count <> 0 then
     WriteFragment(frag, cb);
 
   f1.Free;
   f2.Free;
   fb.Free;
+
+  if (cb = (c1 + c2)) and (EraseFiles) then
+  begin
+    DeleteFile(f1n+'.base');
+    DeleteFile(f2n+'.base');
+  end;
 
   Merge := uniq;
 end;
