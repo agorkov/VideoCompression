@@ -12,7 +12,7 @@ uses
 
 type
   TRPartBase = record
-    PartBaseName: shortstring;
+    PartBaseName: shortString;
     FragCount: int64;
   end;
 
@@ -46,21 +46,21 @@ procedure MergePartBaseList;
   end;
 
 var
-  b1n, b2n, brn: shortstring;
+  b1n, b2n, brn: shortString;
 begin
   while PartBaseCount > 1 do
   begin
     SortList;
     b1n := PBList[PartBaseCount - 1].PartBaseName;
     b2n := PBList[PartBaseCount].PartBaseName;
-    brn := USettings.FileName + '_' + GetRandomName(10) + '.base';
+    brn := USettings.FileName + '_' + GetRandomName(10);
     PBList[PartBaseCount].PartBaseName := '';
     PBList[PartBaseCount].FragCount := 0;
     PBList[PartBaseCount - 1].PartBaseName := brn;
     PBList[PartBaseCount - 1].FragCount := UMerge.Merge(b1n, b2n, brn, true);
     PartBaseCount := PartBaseCount - 1;
   end;
-  RenameFile(string(PBList[1].PartBaseName), string(USettings.FileName + '.base'))
+  RenameFile(string(PBList[1].PartBaseName + '.base'), string(USettings.FileName + '.base'))
 end;
 
 initialization

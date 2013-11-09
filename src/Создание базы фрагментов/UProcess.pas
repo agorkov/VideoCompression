@@ -102,8 +102,8 @@ var
   FileName: shortstring;
   FS: TFIleStream;
 begin
-  FileName := USettings.FileName + '_' + GetRandomName(10) + '.base';
-  FS := TFIleStream.Create(FileName, fmCreate);
+  FileName := USettings.FileName + '_' + GetRandomName(10);
+  FS := TFIleStream.Create(FileName+ '.base', fmCreate);
 
   UniqCount := 0;
   for i := 1 to BASE_COUNT do
