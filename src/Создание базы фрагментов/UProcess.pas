@@ -103,7 +103,7 @@ var
   FS: TFIleStream;
 begin
   FileName := USettings.FileName + '_' + GetRandomName(10);
-  FS := TFIleStream.Create(FileName+ '.base', fmCreate);
+  FS := TFIleStream.Create(FileName + '.base', fmCreate);
 
   UniqCount := 0;
   for i := 1 to BASE_COUNT do
@@ -151,14 +151,27 @@ begin
   FrameOld := Frame;
 end;
 
-function quantization(val: byte): byte;
+function GetBit(val: byte): byte;
+var
+  R: byte;
 begin
-  quantization := val div UGlobal.quantizationStep;
+  R := val and (1 shl UGlobal.BitNum - 1);
+  if R > 0 then
+    R := 255
+  else
+    R := 0;
+  GetBit := R;
 end;
 
-function dequantization(val: byte): byte;
+function SetBit(val: byte): byte;
+var
+  R: byte;
 begin
-  dequantization := val * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
+  if val > 0 then
+    R := 255
+  else
+    R := 0;
+  SetBit := R;
 end;
 
 procedure CreateFrame;
@@ -172,12 +185,12 @@ begin
     for j := 0 to UGlobal.PicW - 1 do
     begin
       case USettings.BaseColor of
-      USettings.RGB_R: Frame[i + 1, j + 1] := quantization(p[3 * j + 2]);
-      USettings.RGB_G: Frame[i + 1, j + 1] := quantization(p[3 * j + 1]);
-      USettings.RGB_B: Frame[i + 1, j + 1] := quantization(p[3 * j]);
-      USettings.YIQ_Y: Frame[i + 1, j + 1] := quantization(round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]));
-      USettings.YIQ_I: Frame[i + 1, j + 1] := quantization(round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]));
-      USettings.YIQ_Q: Frame[i + 1, j + 1] := quantization(round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]));
+      USettings.RGB_R: Frame[i + 1, j + 1] := GetBit(p[3 * j + 2]);
+      USettings.RGB_G: Frame[i + 1, j + 1] := GetBit(p[3 * j + 1]);
+      USettings.RGB_B: Frame[i + 1, j + 1] := GetBit(p[3 * j]);
+      USettings.YIQ_Y: Frame[i + 1, j + 1] := GetBit(round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]));
+      USettings.YIQ_I: Frame[i + 1, j + 1] := GetBit(round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]));
+      USettings.YIQ_Q: Frame[i + 1, j + 1] := GetBit(round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]));
     else
       begin
         Halt;
@@ -198,7 +211,7 @@ begin
     pr := BMR.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-      val := dequantization(Frame[i + 1, j + 1]);
+      val := SetBit(Frame[i + 1, j + 1]);
       pr[3 * j] := val;
       pr[3 * j + 1] := val;
       pr[3 * j + 2] := val;
