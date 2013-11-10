@@ -9,7 +9,7 @@ const
   PicW = 640;
   PicH = 480;
   FrameBaseSize = PicH * PicW div FragSize;
-  bpp = 1;
+  bpp = 8;
   BitNum = 1;
 
 implementation
