@@ -2,8 +2,8 @@ object FMain: TFMain
   Left = 0
   Top = 0
   Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1091#1085#1080#1082#1072#1083#1100#1085#1099#1093' '#1088#1072#1079#1085#1086#1089#1090#1077#1081
-  ClientHeight = 279
-  ClientWidth = 815
+  ClientHeight = 517
+  ClientWidth = 1451
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -41,20 +41,20 @@ object FMain: TFMain
   PixelsPerInch = 96
   TextHeight = 13
   object Image1: TImage
-    Left = 334
+    Left = 654
     Top = 8
-    Width = 320
-    Height = 240
+    Width = 640
+    Height = 480
   end
   object Label2: TLabel
-    Left = 660
+    Left = 1300
     Top = 77
     Width = 87
     Height = 13
     Caption = #1055#1086#1088#1086#1075' '#1092#1080#1083#1100#1090#1088#1072' - '
   end
   object Label1: TLabel
-    Left = 660
+    Left = 1300
     Top = 159
     Width = 61
     Height = 13
@@ -75,19 +75,19 @@ object FMain: TFMain
   object PVideo: TPanel
     Left = 8
     Top = 8
-    Width = 320
-    Height = 240
+    Width = 640
+    Height = 480
     TabOrder = 1
   end
   object ProgressBar1: TProgressBar
     Left = 8
-    Top = 254
-    Width = 646
+    Top = 494
+    Width = 1286
     Height = 17
     TabOrder = 2
   end
   object CBShowResult: TCheckBox
-    Left = 660
+    Left = 1300
     Top = 8
     Width = 141
     Height = 17
@@ -97,7 +97,7 @@ object FMain: TFMain
     TabOrder = 3
   end
   object CBSaveResults: TCheckBox
-    Left = 660
+    Left = 1300
     Top = 31
     Width = 141
     Height = 17
@@ -105,7 +105,7 @@ object FMain: TFMain
     TabOrder = 4
   end
   object TrackBar2: TTrackBar
-    Left = 660
+    Left = 1300
     Top = 96
     Width = 138
     Height = 45
@@ -117,7 +117,7 @@ object FMain: TFMain
     OnChange = TrackBar2Change
   end
   object CBWindowsFilter: TCheckBox
-    Left = 660
+    Left = 1300
     Top = 54
     Width = 138
     Height = 17
@@ -126,7 +126,7 @@ object FMain: TFMain
     OnClick = CBWindowsFilterClick
   end
   object CBMedianFilter: TCheckBox
-    Left = 660
+    Left = 1300
     Top = 140
     Width = 138
     Height = 17
@@ -135,7 +135,7 @@ object FMain: TFMain
     OnClick = CBMedianFilterClick
   end
   object TrackBar1: TTrackBar
-    Left = 657
+    Left = 1297
     Top = 178
     Width = 150
     Height = 45
