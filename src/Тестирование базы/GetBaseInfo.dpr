@@ -5,11 +5,7 @@ program GetBaseInfo;
 {$R *.res}
 
 uses
-  System.SysUtils,
-  UGlobal in '..\Shared units\UGlobal.pas',
-  Math,
-  Classes,
-  UFrag in '..\Shared units\UFrag.pas';
+  System.SysUtils, UGlobal in '..\Shared units\UGlobal.pas', Math, Classes, UFrag in '..\Shared units\UFrag.pas', Windows;
 
 const
   FragLength = UGlobal.FragH * UGlobal.FragW * UGlobal.bpp;
@@ -66,8 +62,20 @@ begin
     InsertBefore(elem, ID);
 end;
 
+function GetUniqCount(BaseName: string): int64;
 var
-  FS: TFileStream;
+  f: TFileStream;
+  tmpFrag: TRFrag;
+  Uniq: int64;
+begin
+  Uniq := 0;
+  f := TFileStream.Create(BaseName, fmOpenRead);
+  Uniq := f.Size div sizeof(TRFrag);
+  f.Free;
+  GetUniqCount := Uniq;
+end;
+
+var
   f: TextFile;
   tmpFrag: TRFrag;
   str: string[FragLength];
@@ -76,22 +84,32 @@ var
   elem: TPElem;
   FullMovie, Base, Codes: double;
 
+  HFile, HMap: THandle;
+  AdrBase, Adr: UFrag.TPRFrag;
+
 begin
   try
     InitList;
-    Uniq := 0;
+    Uniq := GetUniqCount(PAramstr(1) + '.base');
     All := 0;
-    FS := TFileStream.Create(Paramstr(1) + '.base', fmOpenRead);
 
-    while not(FS.Position >= FS.Size) do
+    HFile := FileOpen(PAramstr(1) + '.base', fmOpenRead);
+    HMap := CreateFileMapping(HFile, nil, PAGE_READONLY, 0, 0, nil);
+    AdrBase := MapViewOfFile(HMap, FILE_MAP_READ, 0, 0, 0);
+    Adr := AdrBase;
+    while Uniq > 0 do
     begin
-      FS.Read(tmpFrag, sizeof(TRFrag));
+      tmpFrag := Adr^;
       m := tmpFrag.count;
       AddID(m);
-      Uniq := Uniq + 1;
       All := All + m;
+      Uniq := Uniq - 1;
+      Adr := Pointer(int64(Adr) + int64(sizeof(UFrag.TRFrag)));
     end;
-    FS.Free;
+    UnMapViewOfFile(AdrBase);
+    CloseHandle(HMap);
+    CloseHandle(HFile);
+    Uniq := GetUniqCount(PAramstr(1) + '.base');
     writeln('Данные считаны. Вычисление энтропии...');
 
     elem := DLF^.next;
@@ -107,9 +125,9 @@ begin
     Base := Uniq * (UGlobal.FragSize * bpp + 2);
     Codes := All * entropy;
 
-    AssignFile(f, Paramstr(1) + '.txt');
+    AssignFile(f, PAramstr(1) + '.txt');
     rewrite(f);
-    writeln(f, 'Файл                                   ', Paramstr(1));
+    writeln(f, 'Файл                                   ', PAramstr(1));
     writeln(f, 'Кадр                                   ', UGlobal.PicH, 'x', UGlobal.PicW);
     writeln(f, 'Окно                                   ', UGlobal.FragH, 'x', UGlobal.FragW);
     writeln(f, 'Бит на пиксел                          ', UGlobal.bpp);
