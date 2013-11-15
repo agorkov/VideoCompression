@@ -1,11 +1,10 @@
-
 program GetBaseInfo;
 
 {$APPTYPE CONSOLE}
 {$R *.res}
 
 uses
-  System.SysUtils, UGlobal in '..\Shared units\UGlobal.pas', Math, Classes, UFrag in '..\Shared units\UFrag.pas', Windows;
+  System.SysUtils, UGlobal in '..\Shared units\UGlobal.pas', Math, Classes, UFrag in '..\Shared units\UFrag.pas';
 
 const
   FragLength = UGlobal.FragH * UGlobal.FragW * UGlobal.bpp;
@@ -62,54 +61,32 @@ begin
     InsertBefore(elem, ID);
 end;
 
-function GetUniqCount(BaseName: string): int64;
 var
-  f: TFileStream;
-  tmpFrag: TRFrag;
-  Uniq: int64;
-begin
-  Uniq := 0;
-  f := TFileStream.Create(BaseName, fmOpenRead);
-  Uniq := f.Size div sizeof(TRFrag);
-  f.Free;
-  GetUniqCount := Uniq;
-end;
-
-var
+  FS: TFileStream;
   f: TextFile;
   tmpFrag: TRFrag;
   str: string[FragLength];
   m, Uniq, All: int64;
-  P_i, entropy: double;
+  P_i, entropy, codeLength: double;
   elem: TPElem;
   FullMovie, Base, Codes: double;
-
-  HFile, HMap: THandle;
-  AdrBase, Adr: UFrag.TPRFrag;
 
 begin
   try
     InitList;
-    Uniq := GetUniqCount(PAramstr(1) + '.base');
+    Uniq := 0;
     All := 0;
+    FS := TFileStream.Create(Paramstr(1) + '.base', fmOpenRead);
 
-    HFile := FileOpen(PAramstr(1) + '.base', fmOpenRead);
-    HMap := CreateFileMapping(HFile, nil, PAGE_READONLY, 0, 0, nil);
-    AdrBase := MapViewOfFile(HMap, FILE_MAP_READ, 0, 0, 0);
-    Adr := AdrBase;
-    while Uniq > 0 do
+    while not(FS.Position >= FS.Size) do
     begin
-      tmpFrag := Adr^;
+      FS.Read(tmpFrag, sizeof(TRFrag));
       m := tmpFrag.count;
       AddID(m);
+      Uniq := Uniq + 1;
       All := All + m;
-      Uniq := Uniq - 1;
-      Adr := Pointer(int64(Adr) + int64(sizeof(UFrag.TRFrag)));
     end;
-    UnMapViewOfFile(AdrBase);
-    CloseHandle(HMap);
-    CloseHandle(HFile);
-    Uniq := GetUniqCount(PAramstr(1) + '.base');
+    FS.Free;
     writeln('Данные считаны. Вычисление энтропии...');
 
     elem := DLF^.next;
@@ -125,18 +102,17 @@ begin
     Base := Uniq * (UGlobal.FragSize * bpp + 2);
     Codes := All * entropy;
 
-    AssignFile(f, PAramstr(1) + '.txt');
+    AssignFile(f, Paramstr(1) + '.txt');
     rewrite(f);
-    writeln(f, 'Файл                                   ', PAramstr(1));
     writeln(f, 'Кадр                                   ', UGlobal.PicH, 'x', UGlobal.PicW);
     writeln(f, 'Окно                                   ', UGlobal.FragH, 'x', UGlobal.FragW);
     writeln(f, 'Бит на пиксел                          ', UGlobal.bpp);
     writeln(f, 'Количество элементов в передаче        ', All, ' (', floattostrf(All * UGlobal.FragSize / (UGlobal.PicW * UGlobal.PicH), ffFixed, 8, 2), ' кадров)');
     writeln(f, 'Количество уникальных элементов в базе ', Uniq);
     writeln(f, 'Энтропия базы                          ', floattostrf(entropy, ffFixed, 3, 5));
-    writeln(f, 'Ожидаемая степень сжатия               ', floattostrf(FullMovie / (Base + Codes), ffFixed, 3, 5));
-    writeln(f, 'Доля базы в передаче                   ', floattostrf(Base / (Base + Codes), ffFixed, 3, 5));
-    writeln(f, 'Отношение размеров базы и фильма       ', floattostrf(Base / FullMovie, ffFixed, 3, 5));
+    codeLength := entropy;
+    writeln(f, 'Средняя длина кода                     ', floattostrf(codeLength, ffFixed, 3, 5));
+    writeln(f, 'Ожидаемая степень сжатия               ', floattostrf(Uniq / All + codeLength / (UGlobal.FragH * UGlobal.FragW * UGlobal.bpp), ffFixed, 3, 5));
     elem := DLF^.next;
     while elem <> DLL do
     begin
