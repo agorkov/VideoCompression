@@ -109,7 +109,6 @@ begin
   for i := 1 to BASE_COUNT do
   begin
     FS.Write(GlobalBase[i]^, SizeOf(UFrag.TRFrag));
-    // writeln(f, UFrag.FragToString(GlobalBase[i]^.frag), ' ', GlobalBase[i]^.count);
     UniqCount := UniqCount + 1;
   end;
   UMergeList.AddPartBase(FileName, UniqCount);
@@ -174,6 +173,18 @@ begin
   SetBit := R;
 end;
 
+function quantization(val: byte): byte;
+begin
+  quantization := val div UGlobal.quantizationStep;
+end;
+
+function dequantization(val: byte): byte;
+begin
+  dequantization := val * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
+end;
+
+{$IF UGlobal.BitNum in [1..8]}
+
 procedure CreateFrame;
 var
   i, j: LongWord;
@@ -219,6 +230,55 @@ begin
   end;
   UFMain.FMain.Image1.Picture.Bitmap := BMR;
 end;
+{$IFEND}
+{$IF UGlobal.BitNum=0}
+
+procedure CreateFrame;
+var
+  i, j: LongWord;
+  p: pByteArray;
+begin
+  for i := 0 to UGlobal.PicH - 1 do
+  begin
+    p := BM.ScanLine[i];
+    for j := 0 to UGlobal.PicW - 1 do
+    begin
+      case USettings.BaseColor of
+      USettings.RGB_R: Frame[i + 1, j + 1] := quantization(p[3 * j + 2]);
+      USettings.RGB_G: Frame[i + 1, j + 1] := quantization(p[3 * j + 1]);
+      USettings.RGB_B: Frame[i + 1, j + 1] := quantization(p[3 * j]);
+      USettings.YIQ_Y: Frame[i + 1, j + 1] := quantization(round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]));
+      USettings.YIQ_I: Frame[i + 1, j + 1] := quantization(round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]));
+      USettings.YIQ_Q: Frame[i + 1, j + 1] := quantization(round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]));
+    else
+      begin
+        Halt;
+      end;
+      end;
+    end;
+  end;
+end;
+
+procedure ShowResultFrame;
+var
+  i, j: LongWord;
+  pr: pByteArray;
+  val: byte;
+begin
+  for i := 0 to UGlobal.PicH - 1 do
+  begin
+    pr := BMR.ScanLine[i];
+    for j := 0 to UGlobal.PicW - 1 do
+    begin
+      val := dequantization(Frame[i + 1, j + 1]);
+      pr[3 * j] := val;
+      pr[3 * j + 1] := val;
+      pr[3 * j + 2] := val;
+    end;
+  end;
+  UFMain.FMain.Image1.Picture.Bitmap := BMR;
+end;
+{$IFEND}
 
 procedure SaveFrame(FrameNum: LongWord);
 var
