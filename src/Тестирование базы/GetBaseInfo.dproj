@@ -89,7 +89,7 @@
 			<Debugger_RunParams>TOS_BP_3x2_d1</Debugger_RunParams>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<Debugger_RunParams>TOS_BP_3x2_d1</Debugger_RunParams>
+			<Debugger_RunParams>TOS_BP_5x5_f3</Debugger_RunParams>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
