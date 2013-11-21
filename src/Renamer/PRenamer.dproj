@@ -1,13 +1,13 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{148672BA-D434-4EE5-9189-6F0153660AC1}</ProjectGuid>
+			<ProjectGuid>{0C129AA5-6541-40A9-B270-587A72734E2B}</ProjectGuid>
 			<ProjectVersion>13.4</ProjectVersion>
 			<FrameworkType>None</FrameworkType>
-			<MainSource>GetBaseInfo.dpr</MainSource>
+			<MainSource>PRenamer.dpr</MainSource>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
-			<TargetedPlatforms>3</TargetedPlatforms>
+			<TargetedPlatforms>1</TargetedPlatforms>
 			<AppType>Console</AppType>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -28,12 +28,6 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
-		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win64)'!=''">
-			<Cfg_1_Win64>true</Cfg_1_Win64>
-			<CfgParent>Cfg_1</CfgParent>
-			<Cfg_1>true</Cfg_1>
-			<Base>true</Base>
-		</PropertyGroup>
 		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win32)'!=''">
 			<Cfg_1_Win32>true</Cfg_1_Win32>
 			<CfgParent>Cfg_1</CfgParent>
@@ -45,19 +39,12 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
-		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
-			<Cfg_2_Win32>true</Cfg_2_Win32>
-			<CfgParent>Cfg_2</CfgParent>
-			<Cfg_2>true</Cfg_2>
-			<Base>true</Base>
-		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_BplOutput>..\..\out</DCC_BplOutput>
 			<Manifest_File>None</Manifest_File>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>1049</VerInfo_Locale>
-			<Icon_MainIcon>..\Gorkoff.ico</Icon_MainIcon>
-			<DCC_UsePackage>bindcompfmx;fmx;rtl;dbrtl;IndySystem;DbxClientDriver;bindcomp;inetdb;DBXInterBaseDriver;xmlrtl;DbxCommonDriver;IndyProtocols;DBXMySQLDriver;dbxcds;bindengine;soaprtl;CustomIPTransport;dsnap;IndyCore;fmxase;inet;fmxobj;inetdbxpress;fmxdae;dbexpress;IPIndyImpl;$(DCC_UsePackage)</DCC_UsePackage>
+			<DCC_BplOutput>..\..\out</DCC_BplOutput>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<DCC_UsePackage>bindcompfmx;fmx;rtl;dbrtl;IndySystem;DbxClientDriver;bindcomp;inetdb;DBXInterBaseDriver;xmlrtl;DbxCommonDriver;IndyProtocols;DBXMySQLDriver;dbxcds;bindengine;soaprtl;CustomIPTransport;dsnap;fmxase;IndyCore;inet;fmxobj;inetdbxpress;fmxdae;IPIndyImpl;dbexpress;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
 			<DCC_DcuOutput>..\..\out</DCC_DcuOutput>
 			<DCC_ExeOutput>..\..\out</DCC_ExeOutput>
@@ -68,12 +55,10 @@
 			<DCC_K>false</DCC_K>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win64)'!=''">
-			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
-			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_UsePackage>vclimg;vclactnband;vcldb;vcldsnap;bindcompvcl;vclie;vcltouch;websnap;VclSmp;vcl;dsnapcon;vclx;webdsnap;$(DCC_UsePackage)</DCC_UsePackage>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win32)'!=''">
-			<DCC_UsePackage>vcldbx;frx16;TeeDB;Rave100VCL;vclib;Tee;inetdbbde;svnui;ibxpress;vclimg;frxDB16;intrawebdb_120_160;fmi;fs16;FMXTee;TeeUI;vclactnband;vcldb;vcldsnap;bindcompvcl;vclie;vcltouch;Intraweb_120_160;websnap;vclribbon;frxe16;VclSmp;fsDB16;vcl;CloudService;CodeSiteExpressPkg;FmxTeeUI;dsnapcon;vclx;webdsnap;svn;bdertl;adortl;$(DCC_UsePackage)</DCC_UsePackage>
+			<DCC_UsePackage>vcldbx;frx16;TeeDB;Rave100VCL;vclib;Tee;inetdbbde;svnui;ibxpress;vclimg;fmi;intrawebdb_120_160;frxDB16;fs16;TeeUI;FMXTee;vclactnband;vcldb;vcldsnap;bindcompvcl;vclie;vcltouch;Intraweb_120_160;websnap;vclribbon;VclSmp;frxe16;fsDB16;vcl;CloudService;CodeSiteExpressPkg;FmxTeeUI;dsnapcon;vclx;webdsnap;svn;bdertl;adortl;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
@@ -85,12 +70,8 @@
 			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-			<Debugger_RunParams>TOS_BP_3x2_d1</Debugger_RunParams>
-		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<PostBuildEvent><![CDATA[$(OUTPUTDIR)PRenamer]]></PostBuildEvent>
-			<Debugger_RunParams>TOS</Debugger_RunParams>
+			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
@@ -100,16 +81,11 @@
 			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<Debugger_RunParams>TOS1x01</Debugger_RunParams>
-			<VerInfo_Locale>1033</VerInfo_Locale>
-		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="..\Shared units\UGlobal.pas"/>
-			<DCCReference Include="..\Shared units\UFrag.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -155,7 +131,7 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Source>
-						<Source Name="MainSource">GetBaseInfo.dpr</Source>
+						<Source Name="MainSource">PRenamer.dpr</Source>
 					</Source>
 					<Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
@@ -164,7 +140,7 @@
 				</Delphi.Personality>
 				<Deployment/>
 				<Platforms>
-					<Platform value="Win64">True</Platform>
+					<Platform value="Win64">False</Platform>
 					<Platform value="OSX32">False</Platform>
 					<Platform value="Win32">True</Platform>
 				</Platforms>
@@ -173,12 +149,4 @@
 		</ProjectExtensions>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
 		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>
-		<PropertyGroup Condition="'$(Config)'=='Debug' And '$(Platform)'=='Win32'">
-			<PreBuildEvent/>
-			<PreBuildEventIgnoreExitCode>False</PreBuildEventIgnoreExitCode>
-			<PreLinkEvent/>
-			<PreLinkEventIgnoreExitCode>False</PreLinkEventIgnoreExitCode>
-			<PostBuildEvent>$(OUTPUTDIR)PRenamer</PostBuildEvent>
-			<PostBuildEventIgnoreExitCode>False</PostBuildEventIgnoreExitCode>
-		</PropertyGroup>
 	</Project>
