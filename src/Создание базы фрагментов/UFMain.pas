@@ -68,8 +68,8 @@ var
 begin
   if paramcount = 6 then
   begin
-    USettings.FileName := ParamStr(1);
-    FMain.Caption := USettings.FileName;
+    USettings.FileName := ANSIString(ParamStr(1));
+    FMain.Caption := string(USettings.FileName);
     FMain.Caption := FMain.Caption + ' ' + 'Создание базы уникальных';
 
     if ParamStr(2) = 'd' then
@@ -113,7 +113,7 @@ begin
   end;
 
   SegCount := 0;
-  while FileExists(GetFullSegName(USettings.FileName, SegCount)) do
+  while FileExists(GetFullSegName(string(USettings.FileName), SegCount)) do
     SegCount := SegCount + 1;
   if SegCount > 0 then
   begin
@@ -121,7 +121,7 @@ begin
     ProgressBar1.Max := 0;
     for SegNum := 0 to SegCount do
     begin
-      MP.FileName := GetFullSegName(USettings.FileName, SegNum);
+      MP.FileName := GetFullSegName(string(USettings.FileName), SegNum);
       MP.Open;
       ProgressBar1.Max := ProgressBar1.Max + MP.length;
       MP.Close;
@@ -129,7 +129,7 @@ begin
 
     for SegNum := 0 to SegCount do
     begin
-      MP.FileName := GetFullSegName(USettings.FileName, SegNum);
+      MP.FileName := GetFullSegName(string(USettings.FileName), SegNum);
       MP.Open;
       MP.Frames := 1;
       i := 0;
@@ -148,7 +148,7 @@ begin
     SealGlobalBase;
     UProcess.WriteBase;
   end;
-  USettings.FileName := ParamStr(6);
+  USettings.FileName := ANSIString(ParamStr(6));
   UMergeList.MergePartBaseList;
 
   FMain.Close;

@@ -98,8 +98,8 @@ begin
 
   if (cb = (c1 + c2)) and (EraseFiles) then
   begin
-    DeleteFile(f1n + '.base');
-    DeleteFile(f2n + '.base');
+    DeleteFile(string(f1n + '.base'));
+    DeleteFile(string(f2n + '.base'));
   end;
 
   Merge := uniq;

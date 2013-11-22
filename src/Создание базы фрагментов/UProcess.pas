@@ -95,7 +95,6 @@ begin
 end;
 
 procedure WriteBASE;
-
 var
   i: LongWord;
   UniqCount: int64;
@@ -103,13 +102,12 @@ var
   FS: TFIleStream;
 begin
   FileName := USettings.FileName + '_' + GetRandomName(10);
-  FS := TFIleStream.Create(FileName+ '.base', fmCreate);
+  FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
 
   UniqCount := 0;
   for i := 1 to BASE_COUNT do
   begin
     FS.Write(GlobalBase[i]^, SizeOf(UFrag.TRFrag));
-    // writeln(f, UFrag.FragToString(GlobalBase[i]^.frag), ' ', GlobalBase[i]^.count);
     UniqCount := UniqCount + 1;
   end;
   UMergeList.AddPartBase(FileName, UniqCount);
@@ -151,14 +149,37 @@ begin
   FrameOld := Frame;
 end;
 
-function quantization(val: byte): byte;
+function EncodePixel(val: byte): byte;
+var
+  R: byte;
 begin
-  quantization := val div UGlobal.quantizationStep;
+{$IF UGlobal.BitNum=0}
+  R := val div UGlobal.quantizationStep;
+{$IFEND}
+{$IF UGlobal.BitNum<>0}
+  R := val and (1 shl UGlobal.BitNum - 1);
+  if R > 0 then
+    R := 255
+  else
+    R := 0;
+{$IFEND}
+  EncodePixel := R;
 end;
 
-function dequantization(val: byte): byte;
+function DecodePixel(val: byte): byte;
+var
+  R: byte;
 begin
-  dequantization := val * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
+{$IF UGlobal.BitNum=0}
+  R := val * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
+{$IFEND}
+{$IF UGlobal.BitNum<>0}
+  if val > 0 then
+    R := 255
+  else
+    R := 0;
+{$IFEND}
+  DecodePixel := R;
 end;
 
 procedure CreateFrame;
@@ -172,12 +193,12 @@ begin
     for j := 0 to UGlobal.PicW - 1 do
     begin
       case USettings.BaseColor of
-      USettings.RGB_R: Frame[i + 1, j + 1] := quantization(p[3 * j + 2]);
-      USettings.RGB_G: Frame[i + 1, j + 1] := quantization(p[3 * j + 1]);
-      USettings.RGB_B: Frame[i + 1, j + 1] := quantization(p[3 * j]);
-      USettings.YIQ_Y: Frame[i + 1, j + 1] := quantization(round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]));
-      USettings.YIQ_I: Frame[i + 1, j + 1] := quantization(round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]));
-      USettings.YIQ_Q: Frame[i + 1, j + 1] := quantization(round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]));
+      USettings.RGB_R: Frame[i + 1, j + 1] := EncodePixel(p[3 * j + 2]);
+      USettings.RGB_G: Frame[i + 1, j + 1] := EncodePixel(p[3 * j + 1]);
+      USettings.RGB_B: Frame[i + 1, j + 1] := EncodePixel(p[3 * j]);
+      USettings.YIQ_Y: Frame[i + 1, j + 1] := EncodePixel(round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]));
+      USettings.YIQ_I: Frame[i + 1, j + 1] := EncodePixel(round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]));
+      USettings.YIQ_Q: Frame[i + 1, j + 1] := EncodePixel(round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]));
     else
       begin
         Halt;
@@ -198,7 +219,7 @@ begin
     pr := BMR.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-      val := dequantization(Frame[i + 1, j + 1]);
+      val := DecodePixel(Frame[i + 1, j + 1]);
       pr[3 * j] := val;
       pr[3 * j + 1] := val;
       pr[3 * j + 2] := val;
