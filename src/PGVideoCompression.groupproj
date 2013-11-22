@@ -3,9 +3,6 @@
 			<ProjectGuid>{0373C20B-6050-44DF-AE1E-6715BDA39E9A}</ProjectGuid>
 		</PropertyGroup>
 		<ItemGroup>
-			<Projects Include="Renamer\PRenamer.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="Создание базы фрагментов\GetBase.dproj">
 				<Dependencies/>
 			</Projects>
@@ -15,6 +12,9 @@
 			<Projects Include="Слияние баз\MergeBases.dproj">
 				<Dependencies/>
 			</Projects>
+			<Projects Include="Renamer\PRenamer.dproj">
+				<Dependencies>Создание базы фрагментов\GetBase.dproj;Тестирование базы\GetBaseInfo.dproj;Слияние баз\MergeBases.dproj</Dependencies>
+			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -23,15 +23,6 @@
 				<Default.Personality/>
 			</BorlandProject>
 		</ProjectExtensions>
-		<Target Name="PRenamer">
-			<MSBuild Projects="Renamer\PRenamer.dproj"/>
-		</Target>
-		<Target Name="PRenamer:Clean">
-			<MSBuild Projects="Renamer\PRenamer.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="PRenamer:Make">
-			<MSBuild Projects="Renamer\PRenamer.dproj" Targets="Make"/>
-		</Target>
 		<Target Name="GetBase">
 			<MSBuild Projects="Создание базы фрагментов\GetBase.dproj"/>
 		</Target>
@@ -59,14 +50,23 @@
 		<Target Name="MergeBases:Make">
 			<MSBuild Projects="Слияние баз\MergeBases.dproj" Targets="Make"/>
 		</Target>
+		<Target Name="PRenamer" DependsOnTargets="GetBase;GetBaseInfo;MergeBases">
+			<MSBuild Projects="Renamer\PRenamer.dproj"/>
+		</Target>
+		<Target Name="PRenamer:Clean" DependsOnTargets="GetBase:Clean;GetBaseInfo:Clean;MergeBases:Clean">
+			<MSBuild Projects="Renamer\PRenamer.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="PRenamer:Make" DependsOnTargets="GetBase:Make;GetBaseInfo:Make;MergeBases:Make">
+			<MSBuild Projects="Renamer\PRenamer.dproj" Targets="Make"/>
+		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="PRenamer;GetBase;GetBaseInfo;MergeBases"/>
+			<CallTarget Targets="GetBase;GetBaseInfo;MergeBases;PRenamer"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="PRenamer:Clean;GetBase:Clean;GetBaseInfo:Clean;MergeBases:Clean"/>
+			<CallTarget Targets="GetBase:Clean;GetBaseInfo:Clean;MergeBases:Clean;PRenamer:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="PRenamer:Make;GetBase:Make;GetBaseInfo:Make;MergeBases:Make"/>
+			<CallTarget Targets="GetBase:Make;GetBaseInfo:Make;MergeBases:Make;PRenamer:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>

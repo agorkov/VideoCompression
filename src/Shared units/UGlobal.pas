@@ -3,7 +3,7 @@ unit UGlobal;
 interface
 
 const
-  FragH = 5;
+  FragH = 6;
   FragW = 5;
   FragSize = FragH * FragW;
   PicW = 640;

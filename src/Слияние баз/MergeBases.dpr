@@ -17,10 +17,8 @@ type
 function GetUniqCount(BaseName: string): int64;
 var
   f: TFileStream;
-  tmpFrag: TRFrag;
   Uniq: int64;
 begin
-  Uniq := 0;
   f := TFileStream.Create(BaseName, fmOpenRead);
   Uniq := f.Size div sizeof(TRFrag);
   f.Free;
@@ -62,7 +60,7 @@ begin
       end;
     end;
 
-    MergePrefix := GetRandomName(15);
+    MergePrefix := string(GetRandomName(15));
 
     i := 0;
     while BC > 1 do
@@ -71,7 +69,7 @@ begin
       tmpname := MergePrefix + inttostr(i);
       Sort(BL, BC);
       writeln('Начат процесс слияния: ', BL[BC - 1].BaseName, ' (', BL[BC - 1].Uniq, ') и ', BL[BC].BaseName, ' (', BL[BC].Uniq, ')');
-      BL[BC - 1].Uniq := UMerge.Merge(BL[BC - 1].BaseName, BL[BC].BaseName, tmpname, false);
+      BL[BC - 1].Uniq := UMerge.Merge(ANSIString(BL[BC - 1].BaseName), ANSIString(BL[BC].BaseName), ANSIString(tmpname), false);
       BL[BC - 1].BaseName := tmpname;
       writeln(BL[BC - 1].BaseName, ' ', BL[BC - 1].Uniq);
       BL[BC].BaseName := '';

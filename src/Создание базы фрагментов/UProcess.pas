@@ -102,7 +102,7 @@ var
   FS: TFIleStream;
 begin
   FileName := USettings.FileName + '_' + GetRandomName(10);
-  FS := TFIleStream.Create(FileName + '.base', fmCreate);
+  FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
 
   UniqCount := 0;
   for i := 1 to BASE_COUNT do
