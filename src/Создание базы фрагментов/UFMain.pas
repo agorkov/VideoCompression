@@ -66,7 +66,7 @@ var
   SegCount, SegNum: word;
   i: word;
 begin
-  if paramcount = 6 then
+  if paramcount = 5 then
   begin
     USettings.FileName := ANSIString(ParamStr(1));
     FMain.Caption := string(USettings.FileName);
@@ -148,9 +148,17 @@ begin
     SealGlobalBase;
     UProcess.WriteBase;
   end;
-  USettings.FileName := ANSIString(ParamStr(6));
+  USettings.FileName := ParamStr(1) + '_';
+  if USettings.ElemBase = DiffBase then
+    USettings.FileName := USettings.FileName + 'd_'
+  else
+    USettings.FileName := USettings.FileName + 'f_';
+  USettings.FileName := USettings.FileName + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_';
+  if UGlobal.BitNum in [1 .. 8] then
+    USettings.FileName := USettings.FileName + 'BP' + inttostr(UGlobal.BitNum) + '_'
+  else
+    USettings.FileName := USettings.FileName + 'COL' + inttostr(UGlobal.bpp) + '_';
   UMergeList.MergePartBaseList;
-
   FMain.Close;
 end;
 

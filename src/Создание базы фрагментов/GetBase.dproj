@@ -5,9 +5,9 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>GetBase.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<Platform Condition="'$(Platform)'==''">Win64</Platform>
-			<TargetedPlatforms>3</TargetedPlatforms>
+			<TargetedPlatforms>2</TargetedPlatforms>
 			<AppType>Application</AppType>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -168,7 +168,7 @@
 				<Deployment/>
 				<Platforms>
 					<Platform value="Win64">True</Platform>
-					<Platform value="Win32">True</Platform>
+					<Platform value="Win32">False</Platform>
 				</Platforms>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
