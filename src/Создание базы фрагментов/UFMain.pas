@@ -155,9 +155,9 @@ begin
     USettings.FileName := USettings.FileName + 'f_';
   USettings.FileName := USettings.FileName + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_';
   if UGlobal.BitNum in [1 .. 8] then
-    USettings.FileName := USettings.FileName + 'BP' + inttostr(UGlobal.BitNum) + '_'
+    USettings.FileName := USettings.FileName + 'BP' + inttostr(UGlobal.BitNum)
   else
-    USettings.FileName := USettings.FileName + 'COL' + inttostr(UGlobal.bpp) + '_';
+    USettings.FileName := USettings.FileName + 'COL' + inttostr(UGlobal.bpp);
   UMergeList.MergePartBaseList;
   FMain.Close;
 end;

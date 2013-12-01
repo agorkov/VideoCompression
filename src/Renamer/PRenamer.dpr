@@ -9,7 +9,7 @@ uses
 begin
   try
     if UGlobal.BitNum = 0 then
-      RenameFile('GetBaseInfo.exe', 'GBI_COL' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_' + inttostr(UGlobal.bpp) + '.exe')
+      RenameFile('GetBaseInfo.exe', 'GBI_COL_' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_' + inttostr(UGlobal.bpp) + '.exe')
     else
       RenameFile('GetBaseInfo.exe', 'GBI_BP_' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '.exe');
     if UGlobal.BitNum = 0 then
