@@ -5,7 +5,7 @@
 			<FrameworkType>None</FrameworkType>
 			<MainSource>GetBaseInfo.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win64</Platform>
 			<TargetedPlatforms>2</TargetedPlatforms>
 			<AppType>Console</AppType>
@@ -91,6 +91,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
+			<Debugger_RunParams>12</Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">

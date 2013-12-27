@@ -81,14 +81,14 @@ begin
     else
     begin
       k := k + 1;
-      GlobalBase[k] := new(UFrag.TPRFrag);
+      // GlobalBase[k] := new(UFrag.TPRFrag);
       GlobalBase[k]^.frag := GlobalBase[i]^.frag;
       GlobalBase[k]^.count := GlobalBase[i]^.count;
     end;
     if i <> k then
     begin
-      dispose(GlobalBase[i]);
-      GlobalBase[i] := nil;
+      // dispose(GlobalBase[i]);
+      GlobalBase[i].count := 0;
     end;
   end;
   BASE_COUNT := k;
@@ -107,6 +107,8 @@ begin
   UniqCount := 0;
   for i := 1 to BASE_COUNT do
   begin
+    if GlobalBase[i]^.count = 0 then
+      continue;
     FS.Write(GlobalBase[i]^, SizeOf(UFrag.TRFrag));
     UniqCount := UniqCount + 1;
   end;
@@ -313,7 +315,7 @@ begin
       for R := i to i + (UGlobal.FragH - 1) do
         for c := j to j + (UGlobal.FragW - 1) do
         begin
-          FrameBase[k].frag[p] := Frame[R, c] xor FrameOld[R, c];
+          FrameBase[k].frag[p] := Frame[R, c] - FrameOld[R, c];
           p := p + 1;
         end;
 

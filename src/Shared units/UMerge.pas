@@ -59,6 +59,8 @@ begin
 end;
 
 function Merge(f1n, f2n, fbn: shortstring; EraseFiles: boolean): int64;
+var
+  per: shortint;
 begin
   c1 := 0;
   c2 := 0;
@@ -69,10 +71,16 @@ begin
   f2 := TFileStream.Create(string(f2n) + '.base', fmOpenRead);
   fb := TFileStream.Create(string(fbn) + '.base', fmCreate);
 
+  per := -1;
   fl1 := true;
   fl2 := true;
-  while (not(f1.Position >= f1.Size)) or (not(f2.Position >= f2.Size)) do
+  while (not(f1.Position >= f1.Size)) and (not(f2.Position >= f2.Size)) do
   begin
+    if round((f1.Position + f2.Position) / (f1.Size + f2.Size) * 100) > per then
+    begin
+      per := round((f1.Position + f2.Position) / (f1.Size + f2.Size) * 100);
+      writeln(per);
+    end;
     if fl1 then
       ReadFragment(f1, frag1, c1);
     if fl2 then
@@ -85,12 +93,26 @@ begin
       fl2 := false;
   end;
 
-  CreateFragment(frag1, frag2, frag, fl1, fl2);
-  if frag.Count <> 0 then
-    WriteFragment(frag, cb);
-  CreateFragment(frag1, frag2, frag, fl1, fl2);
-  if frag.Count <> 0 then
-    WriteFragment(frag, cb);
+  if (frag1.Count > 0) and (frag2.Count > 0)then
+  begin
+    CreateFragment(frag1,frag2,frag,fl1,fl2);
+    WriteFragment(frag,cb);
+  end;
+  if frag1.Count > 0 then
+    WriteFragment(frag1, cb);
+  if frag2.Count > 0 then
+    WriteFragment(frag2, cb);
+
+  while not(f1.Position >= f1.Size) do
+  begin
+    ReadFragment(f1, frag1, c1);
+    WriteFragment(frag1, cb);
+  end;
+  while not(f2.Position >= f2.Size) do
+  begin
+    ReadFragment(f2, frag2, c2);
+    WriteFragment(frag2, cb);
+  end;
 
   f1.Free;
   f2.Free;

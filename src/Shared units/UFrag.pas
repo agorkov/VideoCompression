@@ -6,7 +6,7 @@ uses
   UGlobal;
 
 type
-  TFrag = array [1 .. UGlobal.FragSize] of byte;
+  TFrag = array [1 .. UGlobal.FragSize] of integer;
 
   TPRFrag = ^TRFrag;
 
