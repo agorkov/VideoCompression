@@ -59,8 +59,6 @@ begin
 end;
 
 function Merge(f1n, f2n, fbn: shortstring; EraseFiles: boolean): int64;
-var
-  per: shortint;
 begin
   c1 := 0;
   c2 := 0;
@@ -71,16 +69,10 @@ begin
   f2 := TFileStream.Create(string(f2n) + '.base', fmOpenRead);
   fb := TFileStream.Create(string(fbn) + '.base', fmCreate);
 
-  per := -1;
   fl1 := true;
   fl2 := true;
   while (not(f1.Position >= f1.Size)) and (not(f2.Position >= f2.Size)) do
   begin
-    if round((f1.Position + f2.Position) / (f1.Size + f2.Size) * 100) > per then
-    begin
-      per := round((f1.Position + f2.Position) / (f1.Size + f2.Size) * 100);
-      writeln(per);
-    end;
     if fl1 then
       ReadFragment(f1, frag1, c1);
     if fl2 then
