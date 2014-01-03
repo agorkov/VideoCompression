@@ -11,7 +11,6 @@ var
   ElemBase: TElemBase;
   FilterThresold: byte;
   BaseColor: TBaseColor;
-  NeedMedianFilter, NeedWindowFilter: boolean;
 
 implementation
 

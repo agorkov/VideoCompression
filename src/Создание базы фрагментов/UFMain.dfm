@@ -3,7 +3,7 @@ object FMain: TFMain
   Top = 0
   Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1091#1085#1080#1082#1072#1083#1100#1085#1099#1093' '#1088#1072#1079#1085#1086#1089#1090#1077#1081
   ClientHeight = 548
-  ClientWidth = 1449
+  ClientWidth = 1303
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -46,13 +46,6 @@ object FMain: TFMain
     Width = 640
     Height = 480
   end
-  object Label2: TLabel
-    Left = 1300
-    Top = 115
-    Width = 87
-    Height = 13
-    Caption = #1055#1086#1088#1086#1075' '#1092#1080#1083#1100#1090#1088#1072' - '
-  end
   object Gauge1: TGauge
     Left = 8
     Top = 517
@@ -85,62 +78,5 @@ object FMain: TFMain
     Width = 1286
     Height = 17
     TabOrder = 2
-  end
-  object CBShowResult: TCheckBox
-    Left = 1300
-    Top = 8
-    Width = 141
-    Height = 17
-    Caption = #1055#1086#1082#1072#1079#1099#1074#1072#1090#1100' '#1088#1077#1079#1091#1083#1100#1090#1072#1090
-    Checked = True
-    State = cbChecked
-    TabOrder = 3
-  end
-  object CBShowDiffPixels: TCheckBox
-    Left = 1300
-    Top = 31
-    Width = 141
-    Height = 26
-    Caption = #1055#1086#1082#1072#1079#1099#1074#1072#1090#1100' '#1084#1077#1085#1103#1102#1097#1080#1077#1089#1103' '#1087#1080#1082#1089#1077#1083#1099
-    TabOrder = 4
-    WordWrap = True
-  end
-  object CBSaveResults: TCheckBox
-    Left = 1300
-    Top = 63
-    Width = 141
-    Height = 17
-    Caption = #1057#1086#1093#1088#1072#1085#1103#1090#1100' '#1088#1077#1079#1091#1083#1100#1090#1072#1090#1099
-    TabOrder = 5
-  end
-  object TrackBar2: TTrackBar
-    Left = 1304
-    Top = 134
-    Width = 138
-    Height = 45
-    Enabled = False
-    Max = 100
-    Min = 1
-    Position = 100
-    TabOrder = 6
-    OnChange = TrackBar2Change
-  end
-  object CBWindowsFilter: TCheckBox
-    Left = 1300
-    Top = 96
-    Width = 138
-    Height = 17
-    Caption = #1054#1082#1086#1085#1085#1099#1081' '#1092#1080#1083#1100#1090#1088
-    TabOrder = 7
-    OnClick = CBWindowsFilterClick
-  end
-  object CBMedianFilter: TCheckBox
-    Left = 1300
-    Top = 185
-    Width = 138
-    Height = 17
-    Caption = #1052#1077#1076#1080#1072#1085#1085#1099#1081' '#1092#1080#1083#1100#1090#1088
-    TabOrder = 8
-    OnClick = CBMedianFilterClick
   end
 end

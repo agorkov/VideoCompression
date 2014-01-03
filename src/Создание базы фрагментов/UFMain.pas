@@ -11,18 +11,8 @@ type
     PVideo: TPanel;
     ProgressBar1: TProgressBar;
     Image1: TImage;
-    CBShowResult: TCheckBox;
-    CBShowDiffPixels: TCheckBox;
-    CBSaveResults: TCheckBox;
-    Label2: TLabel;
-    TrackBar2: TTrackBar;
-    CBWindowsFilter: TCheckBox;
-    CBMedianFilter: TCheckBox;
     Gauge1: TGauge;
     procedure FormActivate(Sender: TObject);
-    procedure TrackBar2Change(Sender: TObject);
-    procedure CBWindowsFilterClick(Sender: TObject);
-    procedure CBMedianFilterClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -50,23 +40,12 @@ begin
   GetFullSegName := FullSegName;
 end;
 
-procedure TFMain.CBMedianFilterClick(Sender: TObject);
-begin
-  USettings.NeedMedianFilter := CBMedianFilter.Checked;
-end;
-
-procedure TFMain.CBWindowsFilterClick(Sender: TObject);
-begin
-  USettings.NeedWindowFilter := CBWindowsFilter.Checked;
-  TrackBar2.Enabled := CBWindowsFilter.Checked;
-end;
-
 procedure TFMain.FormActivate(Sender: TObject);
 var
   SegCount, SegNum: word;
   i: word;
 begin
-  if paramcount = 5 then
+  if paramcount = 3 then
   begin
     USettings.FileName := ANSIString(ParamStr(1));
     FMain.Caption := string(USettings.FileName);
@@ -96,20 +75,6 @@ begin
       USettings.BaseColor := USettings.YIQ_I;
     if ParamStr(3) = 'YIQ.Q' then
       USettings.BaseColor := YIQ_Q;
-
-    TrackBar2.Max := UGlobal.FragSize;
-    TrackBar2.Position := 1;
-    CBWindowsFilter.Checked := false;
-    if pos('+W', ParamStr(4)) = 1 then
-    begin
-      CBWindowsFilter.Checked := true;
-      TrackBar2.Position := strtoint(copy(ParamStr(4), 3, length(ParamStr(4))));
-    end;
-
-    if ParamStr(5) = '+M' then
-      CBMedianFilter.Checked := true;
-    if ParamStr(5) = '-M' then
-      CBMedianFilter.Checked := false;
   end;
 
   SegCount := 0;
@@ -160,12 +125,6 @@ begin
     USettings.FileName := USettings.FileName + 'COL' + inttostr(UGlobal.bpp);
   UMergeList.MergePartBaseList;
   FMain.Close;
-end;
-
-procedure TFMain.TrackBar2Change(Sender: TObject);
-begin
-  USettings.FilterThresold := TrackBar2.Position;
-  Label2.Caption := 'Порог фильтра - ' + inttostr(TrackBar2.Position);
 end;
 
 end.

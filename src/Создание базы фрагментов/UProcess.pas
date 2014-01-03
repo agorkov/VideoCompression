@@ -450,12 +450,7 @@ procedure ProcessFrame;
 begin
   CopyFrame;
   CreateFrame;
-  if USettings.NeedWindowFilter then
-    WindowFilter;
-  if USettings.NeedMedianFilter then
-    MedianFilter;
   ShowResultFrame;
-  // SaveFrame(FrameNum);
   case USettings.ElemBase of
   FragBase: CreateLocalFragBase;
   DiffBase: CreateLocalDiffBase;
