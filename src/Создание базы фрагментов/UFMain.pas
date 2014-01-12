@@ -27,9 +27,9 @@ implementation
 {$R *.dfm}
 
 uses
-  UGlobal, USettings, UProcess, UMergeList;
+  UGlobal, USettings, UProcess;
 
-function GetFullSegName(FileName: string; SegNum: word): string;
+function GetFullSegmentName(FileName: string; SegNum: word): string;
 var
   FullSegName: string;
 begin
@@ -37,48 +37,39 @@ begin
   if SegNum < 10 then
     FullSegName := FullSegName + '0';
   FullSegName := FullSegName + inttostr(SegNum) + '.avi';
-  GetFullSegName := FullSegName;
+  GetFullSegmentName := FullSegName;
 end;
 
 procedure TFMain.FormActivate(Sender: TObject);
 var
   SegCount, SegNum: word;
   i: word;
+  T: TDateTime;
 begin
-  if paramcount = 3 then
+  T := Now;
+  if paramcount = 2 then
   begin
-    USettings.FileName := ANSIString(ParamStr(1));
-    FMain.Caption := string(USettings.FileName);
-    FMain.Caption := FMain.Caption + ' ' + 'Создание базы уникальных';
+    USettings.FileName := ParamStr(1);
+    FMain.Caption := USettings.FileName;
+    FMain.Caption := FMain.Caption + ' ' + 'Создание базы элементов';
 
-    if ParamStr(2) = 'd' then
-    begin
-      USettings.ElemBase := DiffBase;
-      FMain.Caption := FMain.Caption + ' ' + 'разностей';
-    end;
-    if ParamStr(2) = 'f' then
-    begin
-      USettings.ElemBase := FragBase;
-      FMain.Caption := FMain.Caption + ' ' + 'фрагментов';
-    end;
-
-    FMain.Caption := FMain.Caption + ' ' + ParamStr(3);
-    if ParamStr(3) = 'RGB.R' then
+    FMain.Caption := FMain.Caption + ' ' + ParamStr(2);
+    if ParamStr(2) = 'RGB.R' then
       USettings.BaseColor := RGB_R;
-    if ParamStr(3) = 'RGB.G' then
+    if ParamStr(2) = 'RGB.G' then
       USettings.BaseColor := RGB_G;
-    if ParamStr(3) = 'RGB.B' then
+    if ParamStr(2) = 'RGB.B' then
       USettings.BaseColor := RGB_B;
-    if ParamStr(3) = 'YIQ.Y' then
+    if ParamStr(2) = 'YIQ.Y' then
       USettings.BaseColor := YIQ_Y;
-    if ParamStr(3) = 'YIQ.I' then
+    if ParamStr(2) = 'YIQ.I' then
       USettings.BaseColor := USettings.YIQ_I;
-    if ParamStr(3) = 'YIQ.Q' then
+    if ParamStr(2) = 'YIQ.Q' then
       USettings.BaseColor := YIQ_Q;
   end;
 
   SegCount := 0;
-  while FileExists(GetFullSegName(string(USettings.FileName), SegCount)) do
+  while FileExists(GetFullSegmentName(string(USettings.FileName), SegCount)) do
     SegCount := SegCount + 1;
   if SegCount > 0 then
   begin
@@ -86,7 +77,7 @@ begin
     ProgressBar1.Max := 0;
     for SegNum := 0 to SegCount do
     begin
-      MP.FileName := GetFullSegName(string(USettings.FileName), SegNum);
+      MP.FileName := GetFullSegmentName(string(USettings.FileName), SegNum);
       MP.Open;
       ProgressBar1.Max := ProgressBar1.Max + MP.length;
       MP.Close;
@@ -94,7 +85,7 @@ begin
 
     for SegNum := 0 to SegCount do
     begin
-      MP.FileName := GetFullSegName(string(USettings.FileName), SegNum);
+      MP.FileName := GetFullSegmentName(string(USettings.FileName), SegNum);
       MP.Open;
       MP.Frames := 1;
       i := 0;
@@ -102,7 +93,7 @@ begin
       begin
         i := i + 1;
         MP.Step;
-        UProcess.BM.Canvas.CopyRect(Rect(0, 0, UProcess.BM.Width, BM.Height), FMain.Canvas, Rect(PVideo.Left, PVideo.Top, PVideo.Left + PVideo.Width - 1, PVideo.Top + PVideo.Height - 1));
+        UProcess.BMIn.Canvas.CopyRect(Rect(0, 0, UProcess.BMIn.Width, BMIn.Height), FMain.Canvas, Rect(PVideo.Left, PVideo.Top, PVideo.Left + PVideo.Width - 1, PVideo.Top + PVideo.Height - 1));
         UProcess.ProcessFrame;
         ProgressBar1.StepBy(1);
         Gauge1.Progress := UProcess.BaseFull;
@@ -110,20 +101,15 @@ begin
       end;
       MP.Close;
     end;
-    SealGlobalBase;
-    UProcess.WriteBase;
+    UProcess.DropToList;
   end;
   USettings.FileName := ParamStr(1) + '_';
-  if USettings.ElemBase = DiffBase then
-    USettings.FileName := USettings.FileName + 'd_'
-  else
-    USettings.FileName := USettings.FileName + 'f_';
   USettings.FileName := USettings.FileName + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_';
-  if UGlobal.BitNum in [1 .. 8] then
+  if UGlobal.BitNum > 1 then
     USettings.FileName := USettings.FileName + 'BP' + inttostr(UGlobal.BitNum)
   else
     USettings.FileName := USettings.FileName + 'COL' + inttostr(UGlobal.bpp);
-  UMergeList.MergePartBaseList;
+  UProcess.WriteList;
   FMain.Close;
 end;
 

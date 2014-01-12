@@ -3,7 +3,7 @@ unit UGlobal;
 interface
 
 const
-  FragH = 5;
+  FragH = 3;
   FragW = 2;
   FragSize = FragH * FragW;
   PicW = 640;
@@ -11,7 +11,7 @@ const
   FrameBaseSize = PicH * PicW div FragSize;
   bpp = 8;
   quantizationStep = 256 div (1 shl UGlobal.bpp);
-  BitNum = 0;
+  BitNum = 9;
 
 implementation
 

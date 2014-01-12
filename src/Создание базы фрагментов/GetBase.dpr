@@ -6,7 +6,6 @@ uses
   UProcess in 'UProcess.pas',
   UGlobal in '..\Shared units\UGlobal.pas',
   UMerge in '..\Shared units\UMerge.pas',
-  UMergeList in 'UMergeList.pas',
   USettings in 'USettings.pas',
   UFrag in '..\Shared units\UFrag.pas';
 

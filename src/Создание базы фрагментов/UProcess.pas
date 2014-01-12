@@ -6,130 +6,46 @@ uses
   Vcl.Graphics;
 
 var
-  BM, BMR: TBitMap;
+  BMIn, BMOut: TBitMap;
   FrameNum: LongWord;
 
 procedure ProcessFrame;
-procedure WriteBASE;
-procedure SealGlobalBase;
 function BaseFull: byte;
+procedure DropToList;
+procedure WriteList;
 
 implementation
 
 uses
-  UGlobal, UFrag, UMergeList, UMerge, SysUtils, Windows, UFMain, USettings, Classes;
+  UGlobal, UFrag, UMerge, SysUtils, Windows, UFMain, USettings, Classes;
 
 const
-  MAX_BASE_COUNT = 150000000;
+  MAX_BASE_COUNT = 70000000;
   FilterBase = 1;
 
+type
+  TPElem = ^TRElem;
+
+  TRElem = record
+    frag: UFrag.TRFrag;
+    prev, next: TPElem;
+  end;
+
 var
-  Frame, FrameOld: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
+  FrameOld, FrameNew: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
+  FrameData: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of integer;
   FrameBase: array [1 .. UGlobal.FrameBaseSize] of UFrag.TRFrag;
   BASE_COUNT: LongWord;
   GlobalBase: array [1 .. MAX_BASE_COUNT] of TPRFrag;
-
-function BaseFull: byte;
-begin
-  BaseFull := round(BASE_COUNT / MAX_BASE_COUNT * 100);
-end;
-
-procedure SealGlobalBase;
-  procedure QuickSort;
-    procedure sort(L, R: LongWord);
-    var
-      w, x: UFrag.TRFrag;
-      i, j: LongWord;
-    begin
-      i := L;
-      j := R;
-      x := GlobalBase[(L + R) div 2]^;
-      repeat
-        while UFrag.CompareFrag(GlobalBase[i]^.frag, x.frag) = 0 do
-          i := i + 1;
-        while UFrag.CompareFrag(x.frag, GlobalBase[j]^.frag) = 0 do
-          j := j - 1;
-        if i <= j then
-        begin
-          w := GlobalBase[i]^;
-          GlobalBase[i]^ := GlobalBase[j]^;
-          GlobalBase[j]^ := w;
-          i := i + 1;
-          j := j - 1;
-        end;
-      until i > j;
-      if L < j then
-        sort(L, j);
-      if i < R then
-        sort(i, R);
-    end;
-
-  begin
-    sort(1, BASE_COUNT);
-  end;
-
-var
-  i, k: LongWord;
-begin
-  QuickSort;
-
-  k := 1;
-  for i := 2 to BASE_COUNT do
-  begin
-    if UFrag.CompareFrag(GlobalBase[i]^.frag, GlobalBase[k]^.frag) = 1 then
-      GlobalBase[k]^.count := GlobalBase[k]^.count + GlobalBase[i]^.count
-    else
-    begin
-      k := k + 1;
-      // GlobalBase[k] := new(UFrag.TPRFrag);
-      GlobalBase[k]^.frag := GlobalBase[i]^.frag;
-      GlobalBase[k]^.count := GlobalBase[i]^.count;
-    end;
-    if i <> k then
-    begin
-      // dispose(GlobalBase[i]);
-      GlobalBase[i].count := 0;
-    end;
-  end;
-  BASE_COUNT := k;
-end;
-
-procedure WriteBASE;
-var
-  i: LongWord;
-  UniqCount: int64;
-  FileName: shortstring;
-  FS: TFIleStream;
-begin
-  FileName := USettings.FileName + '_' + GetRandomName(10);
-  FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
-
-  UniqCount := 0;
-  for i := 1 to BASE_COUNT do
-  begin
-    if GlobalBase[i]^.count = 0 then
-      continue;
-    FS.Write(GlobalBase[i]^, SizeOf(UFrag.TRFrag));
-    UniqCount := UniqCount + 1;
-  end;
-  UMergeList.AddPartBase(FileName, UniqCount);
-  FS.Free;
-
-  for i := 1 to BASE_COUNT do
-  begin
-    dispose(GlobalBase[i]);
-    GlobalBase[i] := nil;
-  end;
-  BASE_COUNT := 0;
-end;
+  DLF, DLL: TPElem;
 
 procedure Init;
 var
   i, j: LongWord;
 begin
-  BASE_COUNT := 0;
-  FilterThresold := 25;
+  FrameNum := 0;
 
+  BASE_COUNT := 0;
   for i := 1 to MAX_BASE_COUNT do
   begin
     GlobalBase[i] := nil;
@@ -141,73 +57,208 @@ begin
   for i := 1 to UGlobal.PicH do
     for j := 1 to UGlobal.PicW do
     begin
-      Frame[i, j] := 0;
+      FrameNew[i, j] := 0;
       FrameOld[i, j] := 0;
+      FrameData[i, j] := 0;
     end;
+
+  NEW(DLF);
+  NEW(DLL);
+  DLF^.prev := nil;
+  DLF^.next := DLL;
+  DLL^.prev := DLF;
+  DLL^.next := nil;
+
+  BMIn := Vcl.Graphics.TBitMap.Create;
+  BMIn.Width := UGlobal.PicW;
+  BMIn.Height := UGlobal.PicH;
+  BMIn.PixelFormat := pf24bit;
+
+  BMOut := Vcl.Graphics.TBitMap.Create;
+  BMOut.Width := UGlobal.PicW;
+  BMOut.Height := UGlobal.PicH;
+  BMOut.PixelFormat := pf24bit;
 end;
 
-procedure CopyFrame;
+procedure DropToList;
+  procedure SealGlobalBase;
+    procedure QuickSort;
+      procedure sort(L, R: LongWord);
+      var
+        w, x: UFrag.TRFrag;
+        i, j: LongWord;
+      begin
+        i := L;
+        j := R;
+        x := GlobalBase[(L + R) div 2]^;
+        repeat
+          while UFrag.CompareFrag(GlobalBase[i]^.frag, x.frag) = 0 do
+            i := i + 1;
+          while UFrag.CompareFrag(x.frag, GlobalBase[j]^.frag) = 0 do
+            j := j - 1;
+          if i <= j then
+          begin
+            w := GlobalBase[i]^;
+            GlobalBase[i]^ := GlobalBase[j]^;
+            GlobalBase[j]^ := w;
+            i := i + 1;
+            j := j - 1;
+          end;
+        until i > j;
+        if L < j then
+          sort(L, j);
+        if i < R then
+          sort(i, R);
+      end;
+
+    begin
+      sort(1, BASE_COUNT);
+    end;
+
+  var
+    i, k: LongWord;
+  begin
+    QuickSort;
+
+    k := 1;
+    for i := 2 to BASE_COUNT do
+    begin
+      if UFrag.CompareFrag(GlobalBase[i]^.frag, GlobalBase[k]^.frag) = 1 then
+        GlobalBase[k]^.count := GlobalBase[k]^.count + GlobalBase[i]^.count
+      else
+      begin
+        k := k + 1;
+        GlobalBase[k]^.frag := GlobalBase[i]^.frag;
+        GlobalBase[k]^.count := GlobalBase[i]^.count;
+      end;
+      if i <> k then
+      begin
+        GlobalBase[i].count := 0;
+      end;
+    end;
+    BASE_COUNT := k;
+  end;
+  procedure InsertAfter(elem: TPElem; newFrag: UFrag.TRFrag);
+  var
+    NewElem, tmp: TPElem;
+  begin
+    NEW(NewElem);
+    NewElem^.frag := newFrag;
+    tmp := elem^.next;
+    elem^.next := NewElem;
+    NewElem^.next := tmp;
+    tmp^.prev := NewElem;
+    NewElem^.prev := elem;
+  end;
+
+var
+  tmpFrag: TRFrag;
+  tmp: TPElem;
+  i: LongWord;
 begin
-  FrameOld := Frame;
+  SealGlobalBase;
+  tmp := DLF;
+  for i := 1 to BASE_COUNT do
+  begin
+    if GlobalBase[i]^.count = 0 then
+      continue;
+    tmpFrag := GlobalBase[i]^;
+    while (tmp^.next <> DLL) and (UFrag.CompareFrag(tmp^.frag.frag, tmpFrag.frag) = 2) do
+      tmp := tmp^.next;
+    InsertAfter(tmp, tmpFrag);
+  end;
+  for i := 1 to BASE_COUNT do
+  begin
+    dispose(GlobalBase[i]);
+    GlobalBase[i] := nil;
+  end;
+  BASE_COUNT := 0;
+end;
+
+procedure WriteList;
+var
+  FileName: string;
+  FS: TFIleStream;
+  elem: TPElem;
+begin
+  FileName := USettings.FileName;
+  FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
+
+  elem := DLF^.next;
+  while elem <> DLL do
+  begin
+    FS.Write(elem^.frag, SizeOf(UFrag.TRFrag));
+    elem := elem^.next;
+  end;
+  FS.Free;
+end;
+
+function BaseFull: byte;
+begin
+  BaseFull := round(BASE_COUNT / MAX_BASE_COUNT * 100);
 end;
 
 function EncodePixel(val: byte): byte;
-var
-  R: byte;
 begin
-{$IF UGlobal.BitNum=0}
-  R := val div UGlobal.quantizationStep;
-{$IFEND}
-{$IF UGlobal.BitNum<>0}
-  R := val and (1 shl UGlobal.BitNum - 1);
-  if R > 0 then
-    R := 255
-  else
-    R := 0;
-{$IFEND}
-  EncodePixel := R;
+  EncodePixel := val div UGlobal.quantizationStep;
 end;
 
-function DecodePixel(val: byte): byte;
-var
-  R: byte;
+function DecodePixel(val: integer): byte;
 begin
-{$IF UGlobal.BitNum=0}
-  R := val * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
-{$IFEND}
-{$IF UGlobal.BitNum<>0}
-  if val > 0 then
-    R := 255
-  else
-    R := 0;
-{$IFEND}
-  DecodePixel := R;
+  DecodePixel := (128 + (val div 2)) * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
 end;
 
-procedure CreateFrame;
+procedure LoadFrameFromBitMap;
 var
   i, j: LongWord;
   p: pByteArray;
 begin
   for i := 0 to UGlobal.PicH - 1 do
   begin
-    p := BM.ScanLine[i];
+    p := BMIn.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
       case USettings.BaseColor of
-      USettings.RGB_R: Frame[i + 1, j + 1] := EncodePixel(p[3 * j + 2]);
-      USettings.RGB_G: Frame[i + 1, j + 1] := EncodePixel(p[3 * j + 1]);
-      USettings.RGB_B: Frame[i + 1, j + 1] := EncodePixel(p[3 * j]);
-      USettings.YIQ_Y: Frame[i + 1, j + 1] := EncodePixel(round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]));
-      USettings.YIQ_I: Frame[i + 1, j + 1] := EncodePixel(round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]));
-      USettings.YIQ_Q: Frame[i + 1, j + 1] := EncodePixel(round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]));
-    else
-      begin
-        Halt;
-      end;
+      USettings.RGB_R: FrameNew[i + 1, j + 1] := p[3 * j + 2];
+      USettings.RGB_G: FrameNew[i + 1, j + 1] := p[3 * j + 1];
+      USettings.RGB_B: FrameNew[i + 1, j + 1] := p[3 * j];
+      USettings.YIQ_Y: FrameNew[i + 1, j + 1] := round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]);
+      USettings.YIQ_I: FrameNew[i + 1, j + 1] := round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]);
+      USettings.YIQ_Q: FrameNew[i + 1, j + 1] := round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]);
       end;
     end;
   end;
+end;
+
+procedure CreateFrameData;
+var
+  row, col: word;
+  val: byte;
+begin
+  for row := 1 to UGlobal.PicH do
+    for col := 1 to UGlobal.PicW do
+{$IF UGlobal.BitNum=0}
+      FrameData[row, col] := FrameNew[row, col] - FrameOld[row, col];
+{$IFEND}
+{$IF UGlobal.BitNum<>0}
+  if BitNum = 9 then
+  begin
+    if FrameNew[row, col] - FrameOld[row, col] >= 0 then
+      FrameData[row, col] := 255
+    else
+      FrameData[row, col] :=-255;
+  end
+  else
+  begin
+    val := abs(FrameNew[row, col] - FrameOld[row, col]);
+    //val := FrameNew[row, col] XOR FrameOld[row, col];
+    val := val and (1 shl (BitNum - 1));
+    if val > 0 then
+      FrameData[row, col] := 255
+    else
+      FrameData[row, col] :=-255;
+  end;
+{$IFEND}
 end;
 
 procedure ShowResultFrame;
@@ -218,32 +269,16 @@ var
 begin
   for i := 0 to UGlobal.PicH - 1 do
   begin
-    pr := BMR.ScanLine[i];
+    pr := BMOut.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-      val := DecodePixel(Frame[i + 1, j + 1]);
+      val := DecodePixel(FrameData[i + 1, j + 1]);
       pr[3 * j] := val;
       pr[3 * j + 1] := val;
       pr[3 * j + 2] := val;
     end;
   end;
-  UFMain.FMain.Image1.Picture.Bitmap := BMR;
-end;
-
-procedure SaveFrame(FrameNum: LongWord);
-var
-  f: TextFile;
-  i, j: LongWord;
-begin
-  AssignFile(f, inttostr(FrameNum) + '.txt');
-  rewrite(f);
-  for i := 1 to UGlobal.PicH do
-  begin
-    for j := 1 to UGlobal.PicW do
-      write(f, Frame[i, j]);
-    writeln(f);
-  end;
-  CloseFile(f);
+  UFMain.FMain.Image1.Picture.Bitmap.Assign(BMOut);
 end;
 
 procedure SealLocalBase();
@@ -315,38 +350,10 @@ begin
       for R := i to i + (UGlobal.FragH - 1) do
         for c := j to j + (UGlobal.FragW - 1) do
         begin
-          FrameBase[k].frag[p] := Frame[R, c] - FrameOld[R, c];
+          FrameBase[k].frag[p] := FrameData[R, c];
           p := p + 1;
         end;
 
-      FrameBase[k].count := 1;
-      k := k + 1;
-      j := j + UGlobal.FragW;
-    end;
-    i := i + UGlobal.FragH;
-    j := 1;
-  end;
-  SealLocalBase;
-end;
-
-procedure CreateLocalFragBase;
-var
-  i, j, k, R, c, p: LongWord;
-begin
-  i := 1;
-  j := 1;
-  k := 1;
-  while i <= UGlobal.PicH - (UGlobal.FragH - 1) do
-  begin
-    while j <= UGlobal.PicW - (UGlobal.FragW - 1) do
-    begin
-      p := 1;
-      for R := i to i + (UGlobal.FragH - 1) do
-        for c := j to j + (UGlobal.FragW - 1) do
-        begin
-          FrameBase[k].frag[p] := Frame[R, c];
-          p := p + 1;
-        end;
       FrameBase[k].count := 1;
       k := k + 1;
       j := j + UGlobal.FragW;
@@ -362,16 +369,12 @@ var
   i: LongWord;
 begin
   if BASE_COUNT + UGlobal.FrameBaseSize > MAX_BASE_COUNT then
-  begin
-    SealGlobalBase;
-    if BaseFull >= 90 then
-      WriteBASE;
-  end;
+    DropToList;
   i := 1;
   while (FrameBase[i].count > 0) and (i <= UGlobal.FrameBaseSize) do
   begin
     BASE_COUNT := BASE_COUNT + 1;
-    GlobalBase[BASE_COUNT] := new(UFrag.TPRFrag);
+    GlobalBase[BASE_COUNT] := NEW(UFrag.TPRFrag);
     GlobalBase[BASE_COUNT]^.frag := FrameBase[i].frag;
     GlobalBase[BASE_COUNT]^.count := FrameBase[i].count;
     i := i + 1;
@@ -380,103 +383,24 @@ begin
     FrameBase[i].count := 0;
 end;
 
-procedure MedianFilter;
-var
-  tmpArr: array [1 .. 9] of byte;
-  i, j: integer;
-  k, L, m: byte;
-  FrameTmp: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
-begin
-  for i := 1 to PicH do
-    for j := 1 to PicW do
-      FrameTmp[i, j] := Frame[i, j];
-
-  for i := FilterBase to UGlobal.PicH - FilterBase do
-  begin
-    for j := FilterBase to UGlobal.PicW - FilterBase do
-    begin
-      tmpArr[1] := FrameTmp[i - 1, j - 1];
-      tmpArr[2] := FrameTmp[i - 1, j];
-      tmpArr[3] := FrameTmp[i - 1, j + 1];
-      tmpArr[4] := FrameTmp[i, j - 1];
-      tmpArr[5] := FrameTmp[i, j];
-      tmpArr[6] := FrameTmp[i, j + 1];
-      tmpArr[7] := FrameTmp[i + 1, j - 1];
-      tmpArr[8] := FrameTmp[i + 1, j];
-      tmpArr[9] := FrameTmp[i + 1, j + 1];
-      for k := 1 to 8 do
-        for L := k + 1 to 9 do
-          if tmpArr[k] > tmpArr[L] then
-          begin
-            m := tmpArr[k];
-            tmpArr[k] := tmpArr[L];
-            tmpArr[L] := m;
-          end;
-      Frame[i, j] := tmpArr[5];
-    end;
-  end;
-end;
-
-procedure WindowFilter;
-var
-  i, j, R, c: word;
-  count: word;
-begin
-  i := 1;
-  j := 1;
-  while i < PicH - FragH do
-  begin
-    while j < PicW - FragW do
-    begin
-      count := 0;
-      for R := i to i + (FragH - 1) do
-        for c := j to j + (FragW - 1) do
-          if Frame[R, c] <> FrameOld[R, c] then
-            count := count + 1;
-
-      if count < FilterThresold then
-        for R := i to i + (FragH - 1) do
-          for c := j to j + (FragW - 1) do
-            Frame[R, c] := FrameOld[R, c];
-
-      j := j + UGlobal.FragW;
-    end;
-    i := i + UGlobal.FragH;
-    j := 1;
-  end;
-end;
-
 procedure ProcessFrame;
 begin
-  CopyFrame;
-  CreateFrame;
+  FrameOld := FrameNew;
+  LoadFrameFromBitMap;
+  CreateFrameData;
   ShowResultFrame;
-  case USettings.ElemBase of
-  FragBase: CreateLocalFragBase;
-  DiffBase: CreateLocalDiffBase;
-  end;
+  CreateLocalDiffBase;
   AddToBase;
   FrameNum := FrameNum + 1;
 end;
 
 initialization
 
-FrameNum := 0;
-BM := Vcl.Graphics.TBitMap.Create;
-BM.Width := UGlobal.PicW;
-BM.Height := UGlobal.PicH;
-BM.PixelFormat := pf24bit;
-
-BMR := Vcl.Graphics.TBitMap.Create;
-BMR.Width := UGlobal.PicW;
-BMR.Height := UGlobal.PicH;
-BMR.PixelFormat := pf24bit;
-
 Init;
 
 finalization
 
-BM.Free;
-BMR.Free;
+BMIn.Free;
+BMOut.Free;
 
 end.
