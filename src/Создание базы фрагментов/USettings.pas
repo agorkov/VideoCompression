@@ -7,8 +7,8 @@ type
   TBaseType = (btFrag, btLDiff, btMDiff);
 
 const
-  BaseType = btFrag;
-  BitNum = 0;
+  BaseType = btMDiff;
+  BitNum = 8;
 
 var
   FileName: string;
