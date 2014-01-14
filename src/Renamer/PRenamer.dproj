@@ -89,6 +89,7 @@ $(PostBuildEvent)]]></PostBuildEvent>
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="..\Shared units\UGlobal.pas"/>
+			<DCCReference Include="..\Создание базы фрагментов\USettings.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -142,16 +143,16 @@ $(PostBuildEvent)]]></PostBuildEvent>
 					</Excluded_Packages>
 				</Delphi.Personality>
 				<Deployment>
-					<DeployFile Class="DebugSymbols" Configuration="Debug" LocalName="..\..\out\PRenamer.rsm">
-						<Platform Name="Win32">
-							<RemoteName>PRenamer.rsm</RemoteName>
-						</Platform>
+					<DeployFile Class="DependencyModule" LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib">
+						<Platform Name="OSX32"/>
 					</DeployFile>
 					<DeployFile Class="ProjectOutput" Configuration="Debug" LocalName="..\..\out\PRenamer.exe">
 						<Platform Name="Win32"/>
 					</DeployFile>
-					<DeployFile Class="DependencyModule" LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib">
-						<Platform Name="OSX32"/>
+					<DeployFile Class="DebugSymbols" Configuration="Debug" LocalName="..\..\out\PRenamer.rsm">
+						<Platform Name="Win32">
+							<RemoteName>PRenamer.rsm</RemoteName>
+						</Platform>
 					</DeployFile>
 					<DeployClass Name="ProjectOutput" Required="true">
 						<Platform Name="OSX32">

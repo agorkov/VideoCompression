@@ -105,10 +105,10 @@ begin
   end;
   USettings.FileName := ParamStr(1) + '_';
   USettings.FileName := USettings.FileName + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_';
-  if UGlobal.BitNum > 1 then
-    USettings.FileName := USettings.FileName + 'BP' + inttostr(UGlobal.BitNum)
+  if USettings.BitNum > 1 then
+    USettings.FileName := USettings.FileName + 'BP' + inttostr(USettings.BitNum)
   else
-    USettings.FileName := USettings.FileName + 'COL' + inttostr(UGlobal.bpp);
+    USettings.FileName := USettings.FileName + 'COL';
   UProcess.WriteList;
   FMain.Close;
 end;

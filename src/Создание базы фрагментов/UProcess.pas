@@ -198,14 +198,22 @@ begin
   BaseFull := round(BASE_COUNT / MAX_BASE_COUNT * 100);
 end;
 
-function EncodePixel(val: byte): byte;
-begin
-  EncodePixel := val div UGlobal.quantizationStep;
-end;
-
 function DecodePixel(val: integer): byte;
 begin
-  DecodePixel := (128 + (val div 2)) * UGlobal.quantizationStep + UGlobal.quantizationStep div 2;
+{$IF USettings.BitNum=0}
+{$IF USettings.BaseType=btMDiff}
+  DecodePixel := 128 + (val div 2);
+{$IFEND}
+{$IF USettings.BaseType=btLDiff}
+  DecodePixel := val;
+{$IFEND}
+{$IF USettings.BaseType=btFrag}
+  DecodePixel := val;
+{$IFEND}
+{$IFEND}
+{$IF USettings.BitNum in [1..9]}
+  DecodePixel := val;
+{$IFEND}
 end;
 
 procedure LoadFrameFromBitMap;
@@ -233,32 +241,35 @@ end;
 procedure CreateFrameData;
 var
   row, col: word;
-  val: byte;
+  val: integer;
 begin
   for row := 1 to UGlobal.PicH do
     for col := 1 to UGlobal.PicW do
-{$IF UGlobal.BitNum=0}
-      FrameData[row, col] := FrameNew[row, col] - FrameOld[row, col];
+    begin
+{$IF USettings.BaseType=btMDiff}
+      val := FrameNew[row, col] - FrameOld[row, col];
 {$IFEND}
-{$IF UGlobal.BitNum<>0}
-  if BitNum = 9 then
-  begin
-    if FrameNew[row, col] - FrameOld[row, col] >= 0 then
-      FrameData[row, col] := 255
-    else
-      FrameData[row, col] :=-255;
-  end
-  else
-  begin
-    val := abs(FrameNew[row, col] - FrameOld[row, col]);
-    //val := FrameNew[row, col] XOR FrameOld[row, col];
-    val := val and (1 shl (BitNum - 1));
-    if val > 0 then
-      FrameData[row, col] := 255
-    else
-      FrameData[row, col] :=-255;
-  end;
+{$IF USettings.BaseType=btLDiff}
+      val := FrameNew[row, col] xor FrameOld[row, col];
 {$IFEND}
+{$IF USettings.BaseType=btFrag}
+      val := FrameNew[row, col];
+{$IFEND}
+{$IF USettings.BitNum=9}
+      if val > 0 then
+        val := 255
+      else
+        val := -255;
+{$IFEND}
+{$IF USettings.BitNum in [1..8]}
+      val := val and (1 shl (BitNum - 1));
+      if val > 0 then
+        val := 255
+      else
+        val := -255;
+{$IFEND}
+      FrameData[row, col] := val;
+    end;
 end;
 
 procedure ShowResultFrame;
@@ -281,61 +292,61 @@ begin
   UFMain.FMain.Image1.Picture.Bitmap.Assign(BMOut);
 end;
 
-procedure SealLocalBase();
-  procedure QuickSort;
-    procedure sort(L, R: LongWord);
-    var
-      w, x: UFrag.TRFrag;
-      i, j: LongWord;
+procedure CreateFrameBase;
+  procedure SealFrameBase();
+    procedure QuickSort;
+      procedure sort(L, R: LongWord);
+      var
+        w, x: UFrag.TRFrag;
+        i, j: LongWord;
+      begin
+        i := L;
+        j := R;
+        x := FrameBase[(L + R) div 2];
+        repeat
+          while UFrag.CompareFrag(FrameBase[i].frag, x.frag) = 0 do
+            i := i + 1;
+          while UFrag.CompareFrag(x.frag, FrameBase[j].frag) = 0 do
+            j := j - 1;
+          if i <= j then
+          begin
+            w := FrameBase[i];
+            FrameBase[i] := FrameBase[j];
+            FrameBase[j] := w;
+            i := i + 1;
+            j := j - 1;
+          end;
+        until i > j;
+        if L < j then
+          sort(L, j);
+        if i < R then
+          sort(i, R);
+      end;
+
     begin
-      i := L;
-      j := R;
-      x := FrameBase[(L + R) div 2];
-      repeat
-        while UFrag.CompareFrag(FrameBase[i].frag, x.frag) = 0 do
-          i := i + 1;
-        while UFrag.CompareFrag(x.frag, FrameBase[j].frag) = 0 do
-          j := j - 1;
-        if i <= j then
-        begin
-          w := FrameBase[i];
-          FrameBase[i] := FrameBase[j];
-          FrameBase[j] := w;
-          i := i + 1;
-          j := j - 1;
-        end;
-      until i > j;
-      if L < j then
-        sort(L, j);
-      if i < R then
-        sort(i, R);
+      sort(1, UGlobal.FrameBaseSize);
     end;
 
+  var
+    i, k: LongWord;
   begin
-    sort(1, UGlobal.FrameBaseSize);
-  end;
-
-var
-  i, k: LongWord;
-begin
-  QuickSort;
-  k := 1;
-  for i := 2 to UGlobal.FrameBaseSize do
-  begin
-    if UFrag.CompareFrag(FrameBase[i].frag, FrameBase[k].frag) = 1 then
-      FrameBase[k].count := FrameBase[k].count + 1
-    else
+    QuickSort;
+    k := 1;
+    for i := 2 to UGlobal.FrameBaseSize do
     begin
-      k := k + 1;
-      FrameBase[k].frag := FrameBase[i].frag;
-      FrameBase[k].count := FrameBase[i].count;
+      if UFrag.CompareFrag(FrameBase[i].frag, FrameBase[k].frag) = 1 then
+        FrameBase[k].count := FrameBase[k].count + 1
+      else
+      begin
+        k := k + 1;
+        FrameBase[k].frag := FrameBase[i].frag;
+        FrameBase[k].count := FrameBase[i].count;
+      end;
+      if i <> k then
+        FrameBase[i].count := 0;
     end;
-    if i <> k then
-      FrameBase[i].count := 0;
   end;
-end;
 
-procedure CreateLocalDiffBase;
 var
   i, j, k, R, c, p: LongWord;
 begin
@@ -361,7 +372,7 @@ begin
     i := i + UGlobal.FragH;
     j := 1;
   end;
-  SealLocalBase;
+  SealFrameBase;
 end;
 
 procedure AddToBase;
@@ -379,8 +390,6 @@ begin
     GlobalBase[BASE_COUNT]^.count := FrameBase[i].count;
     i := i + 1;
   end;
-  for i := 1 to UGlobal.FrameBaseSize do
-    FrameBase[i].count := 0;
 end;
 
 procedure ProcessFrame;
@@ -389,7 +398,7 @@ begin
   LoadFrameFromBitMap;
   CreateFrameData;
   ShowResultFrame;
-  CreateLocalDiffBase;
+  CreateFrameBase;
   AddToBase;
   FrameNum := FrameNum + 1;
 end;
