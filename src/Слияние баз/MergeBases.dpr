@@ -4,7 +4,11 @@ program MergeBases;
 {$R *.res}
 
 uses
-  System.SysUtils, UGlobal in '..\Shared units\UGlobal.pas', UMerge in '..\Shared units\UMerge.pas', UFrag in '..\Shared units\UFrag.pas', Classes;
+  System.SysUtils,
+  UGlobal in '..\Shared units\UGlobal.pas',
+  UMerge in '..\Shared units\UMerge.pas',
+  UElem in '..\Shared units\UElem.pas',
+  Classes;
 
 type
   TBase = record

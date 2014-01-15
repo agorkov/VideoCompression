@@ -115,7 +115,7 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="..\Shared units\UGlobal.pas"/>
-			<DCCReference Include="..\Shared units\UFrag.pas"/>
+			<DCCReference Include="..\Shared units\UElem.pas"/>
 			<DCCReference Include="UList.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

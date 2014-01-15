@@ -8,7 +8,7 @@ function GetRandomName(len: byte): shortstring;
 implementation
 
 uses
-  UGlobal, Classes, System.SysUtils, UFrag;
+  UGlobal, Classes, System.SysUtils, UElem;
 
 var
   f1, f2, fb: TFileStream;
@@ -24,30 +24,30 @@ end;
 
 procedure CreateFragment(var frag1, frag2, F: TRFrag; var fl1, fl2: boolean);
 begin
-  if UFrag.CompareFrag(frag1.frag, frag2.frag) = 0 then
+  if UElem.CompareFrag(frag1.frag, frag2.frag) = 0 then
   begin
     F.frag := frag1.frag;
     F.Count := frag1.Count;
     fl1 := true;
     fl2 := false;
   end;
-  if UFrag.CompareFrag(frag1.frag, frag2.frag) = 1 then
+  if UElem.CompareFrag(frag1.frag, frag2.frag) = 1 then
   begin
     F.frag := frag1.frag;
     F.Count := frag1.Count + frag2.Count;
     fl1 := true;
     fl2 := true;
   end;
-  if UFrag.CompareFrag(frag1.frag, frag2.frag) = 2 then
+  if UElem.CompareFrag(frag1.frag, frag2.frag) = 2 then
   begin
     F.frag := frag2.frag;
     F.Count := frag2.Count;
     fl1 := false;
     fl2 := true;
   end;
-  if UFrag.CompareFrag(F.frag, frag1.frag) = 1 then
+  if UElem.CompareFrag(F.frag, frag1.frag) = 1 then
     frag1.Count := 0;
-  if UFrag.CompareFrag(F.frag, frag2.frag) = 1 then
+  if UElem.CompareFrag(F.frag, frag2.frag) = 1 then
     frag2.Count := 0;
 end;
 

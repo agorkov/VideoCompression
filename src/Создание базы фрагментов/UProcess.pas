@@ -17,7 +17,7 @@ procedure WriteList;
 implementation
 
 uses
-  UGlobal, UFrag, SysUtils, Windows, UFMain, USettings, Classes;
+  UGlobal, UElem, SysUtils, Windows, UFMain, USettings, Classes;
 
 const
   MAX_BASE_COUNT = 150000000;
@@ -27,14 +27,14 @@ type
   TPRListElem = ^TRListElem;
 
   TRListElem = record
-    frag: UFrag.TRFrag;
+    frag: UElem.TRFrag;
     prev, next: TPRListElem;
   end;
 
 var
   FrameOld, FrameNew: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
   FrameData: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of integer;
-  FrameBase: array [1 .. UGlobal.FrameBaseSize] of UFrag.TRFrag;
+  FrameBase: array [1 .. UGlobal.FrameBaseSize] of UElem.TRFrag;
   BASE_COUNT: LongWord;
   GlobalBase: array [1 .. MAX_BASE_COUNT] of TPRFrag;
   DLF, DLL: TPRListElem;
@@ -152,16 +152,16 @@ procedure CreateFrameBase;
     procedure QuickSort;
       procedure sort(L, R: LongWord);
       var
-        w, x: UFrag.TRFrag;
+        w, x: UElem.TRFrag;
         i, j: LongWord;
       begin
         i := L;
         j := R;
         x := FrameBase[(L + R) div 2];
         repeat
-          while UFrag.CompareFrag(FrameBase[i].frag, x.frag) = 0 do
+          while UElem.CompareFrag(FrameBase[i].frag, x.frag) = 0 do
             i := i + 1;
-          while UFrag.CompareFrag(x.frag, FrameBase[j].frag) = 0 do
+          while UElem.CompareFrag(x.frag, FrameBase[j].frag) = 0 do
             j := j - 1;
           if i <= j then
           begin
@@ -189,7 +189,7 @@ procedure CreateFrameBase;
     k := 1;
     for i := 2 to UGlobal.FrameBaseSize do
     begin
-      if UFrag.CompareFrag(FrameBase[i].frag, FrameBase[k].frag) = 1 then
+      if UElem.CompareFrag(FrameBase[i].frag, FrameBase[k].frag) = 1 then
         FrameBase[k].count := FrameBase[k].count + 1
       else
       begin
@@ -241,7 +241,7 @@ begin
   while (FrameBase[i].count > 0) and (i <= UGlobal.FrameBaseSize) do
   begin
     BASE_COUNT := BASE_COUNT + 1;
-    GlobalBase[BASE_COUNT] := NEW(UFrag.TPRFrag);
+    GlobalBase[BASE_COUNT] := NEW(UElem.TPRFrag);
     GlobalBase[BASE_COUNT]^.frag := FrameBase[i].frag;
     GlobalBase[BASE_COUNT]^.count := FrameBase[i].count;
     i := i + 1;
@@ -305,16 +305,16 @@ procedure DropToList;
     procedure QuickSort;
       procedure sort(L, R: LongWord);
       var
-        w, x: UFrag.TRFrag;
+        w, x: UElem.TRFrag;
         i, j: LongWord;
       begin
         i := L;
         j := R;
         x := GlobalBase[(L + R) div 2]^;
         repeat
-          while UFrag.CompareFrag(GlobalBase[i]^.frag, x.frag) = 0 do
+          while UElem.CompareFrag(GlobalBase[i]^.frag, x.frag) = 0 do
             i := i + 1;
-          while UFrag.CompareFrag(x.frag, GlobalBase[j]^.frag) = 0 do
+          while UElem.CompareFrag(x.frag, GlobalBase[j]^.frag) = 0 do
             j := j - 1;
           if i <= j then
           begin
@@ -343,7 +343,7 @@ procedure DropToList;
     k := 1;
     for i := 2 to BASE_COUNT do
     begin
-      if UFrag.CompareFrag(GlobalBase[i]^.frag, GlobalBase[k]^.frag) = 1 then
+      if UElem.CompareFrag(GlobalBase[i]^.frag, GlobalBase[k]^.frag) = 1 then
         GlobalBase[k]^.count := GlobalBase[k]^.count + GlobalBase[i]^.count
       else
       begin
@@ -358,7 +358,7 @@ procedure DropToList;
     end;
     BASE_COUNT := k;
   end;
-  procedure InsertAfter(elem: TPRListElem; newFrag: UFrag.TRFrag);
+  procedure InsertAfter(elem: TPRListElem; newFrag: UElem.TRFrag);
   var
     NewElem, tmp: TPRListElem;
   begin
@@ -383,7 +383,7 @@ begin
     if GlobalBase[i]^.count = 0 then
       continue;
     tmpFrag := GlobalBase[i]^;
-    while (tmp^.next <> DLL) and (UFrag.CompareFrag(tmp^.frag.frag, tmpFrag.frag) = 0) do
+    while (tmp^.next <> DLL) and (UElem.CompareFrag(tmp^.frag.frag, tmpFrag.frag) = 0) do
       tmp := tmp^.next;
     InsertAfter(tmp, tmpFrag);
   end;
@@ -408,7 +408,7 @@ begin
   elem := DLF^.next;
   while elem <> DLL do
   begin
-    FS.Write(elem^.frag, SizeOf(UFrag.TRFrag));
+    FS.Write(elem^.frag, SizeOf(UElem.TRFrag));
     elem := elem^.next;
   end;
   FS.Free;

@@ -4,7 +4,12 @@ program GetBaseInfo;
 {$R *.res}
 
 uses
-  System.SysUtils, UGlobal in '..\Shared units\UGlobal.pas', Math, Classes, UFrag in '..\Shared units\UFrag.pas', UList in 'UList.pas';
+  System.SysUtils,
+  UGlobal in '..\Shared units\UGlobal.pas',
+  Math,
+  Classes,
+  UElem in '..\Shared units\UElem.pas',
+  UList in 'UList.pas';
 
 const
   FragLength = UGlobal.FragH * UGlobal.FragW * UGlobal.bpp;

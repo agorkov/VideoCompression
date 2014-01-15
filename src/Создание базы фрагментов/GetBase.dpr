@@ -6,7 +6,7 @@ uses
   UProcess in 'UProcess.pas',
   UGlobal in '..\Shared units\UGlobal.pas',
   USettings in 'USettings.pas',
-  UFrag in '..\Shared units\UFrag.pas';
+  UElem in '..\Shared units\UElem.pas';
 
 {$R *.res}
 
