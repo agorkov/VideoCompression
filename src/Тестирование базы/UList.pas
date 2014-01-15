@@ -184,7 +184,15 @@ begin
   Entropy := GetEntropy(L);
   if Entropy < 1 then
     Entropy := Entropy + 1;
+{$IF UGlobal.BaseType=btFrag}
   CompLevel := NBase / NFilm * (UGlobal.ElemSize * UGlobal.bpp + 2) / (UGlobal.ElemSize * UGlobal.bpp) + Entropy / (UGlobal.ElemSize * UGlobal.bpp) + GlueCount / NFilm;
+{$IFEND}
+{$IF UGlobal.BaseType=btLDiff}
+  CompLevel := NBase / NFilm * (UGlobal.ElemSize * UGlobal.bpp + 2) / (UGlobal.ElemSize * UGlobal.bpp) + Entropy / (UGlobal.ElemSize * UGlobal.bpp) + GlueCount / NFilm;
+{$IFEND}
+{$IF UGlobal.BaseType=btMDiff}
+  CompLevel := NBase / NFilm * (UGlobal.ElemSize * UGlobal.bpp + UGlobal.ElemSize + 2) / (UGlobal.ElemSize * UGlobal.bpp) + Entropy / (UGlobal.ElemSize * UGlobal.bpp) + GlueCount / NFilm;
+{$IFEND}
 end;
 
 function GetIDbyInd(L: TRList; ind: int64): int64;

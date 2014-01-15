@@ -56,7 +56,7 @@ object FMain: TFMain
   object MP: TMediaPlayer
     Left = 8
     Top = 490
-    Width = 0
+    Width = 29
     Height = 30
     VisibleButtons = [btPlay]
     AutoEnable = False

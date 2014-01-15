@@ -17,7 +17,7 @@ const
 procedure LoadData(var L: TRList);
 var
   FS: TFileStream;
-  tmpFrag: TRElem;
+  tmpFrag: UElem.TRElem;
   m: int64;
 begin
   InitList(L);

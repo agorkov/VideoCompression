@@ -11,7 +11,6 @@ var
 
 procedure ProcessFrame;
 function BaseFull: byte;
-procedure DropToList;
 procedure WriteList;
 
 implementation
@@ -49,14 +48,24 @@ begin
     p := BMIn.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-      case USettings.BaseColor of
-      USettings.RGB_R: FrameNew[i + 1, j + 1] := p[3 * j + 2];
-      USettings.RGB_G: FrameNew[i + 1, j + 1] := p[3 * j + 1];
-      USettings.RGB_B: FrameNew[i + 1, j + 1] := p[3 * j];
-      USettings.YIQ_Y: FrameNew[i + 1, j + 1] := round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]);
-      USettings.YIQ_I: FrameNew[i + 1, j + 1] := round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]);
-      USettings.YIQ_Q: FrameNew[i + 1, j + 1] := round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]);
-      end;
+{$IF BaseColor=RGB_R}
+      FrameNew[i + 1, j + 1] := p[3 * j + 2];
+{$IFEND}
+{$IF BaseColor=RGB_G}
+      FrameNew[i + 1, j + 1] := p[3 * j + 1];
+{$IFEND}
+{$IF BaseColor=RGB_B}
+      FrameNew[i + 1, j + 1] := p[3 * j];
+{$IFEND}
+{$IF BaseColor=YIQ_Y}
+      FrameNew[i + 1, j + 1] := round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]);
+{$IFEND}
+{$IF BaseColor=YIQ_I}
+      FrameNew[i + 1, j + 1] := round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]);
+{$IFEND}
+{$IF BaseColor=YIQ_Q}
+      FrameNew[i + 1, j + 1] := round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]);
+{$IFEND}
     end;
   end;
 end;
@@ -69,22 +78,22 @@ begin
   for row := 1 to UGlobal.PicH do
     for col := 1 to UGlobal.PicW do
     begin
-{$IF USettings.BaseType=btMDiff}
+{$IF BaseType=btMDiff}
       val := FrameNew[row, col] - FrameOld[row, col];
 {$IFEND}
-{$IF USettings.BaseType=btLDiff}
+{$IF BaseType=btLDiff}
       val := FrameNew[row, col] xor FrameOld[row, col];
 {$IFEND}
-{$IF USettings.BaseType=btFrag}
+{$IF BaseType=btFrag}
       val := FrameNew[row, col];
 {$IFEND}
-{$IF USettings.BitNum=9}
+{$IF BitNum=9}
       if val > 0 then
         val := 255
       else
         val := -255;
 {$IFEND}
-{$IF USettings.BitNum in [1..8]}
+{$IF BitNum in [1..8]}
       val := val and (1 shl (BitNum - 1));
       if val > 0 then
         val := 255
@@ -106,21 +115,20 @@ begin
     pr := BMOut.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-{$IF USettings.BitNum=0}
-{$IF USettings.BaseType=btMDiff}
+{$IF BitNum=0}
+{$IF BaseType=btMDiff}
       val := 128 + (FrameData[i + 1, j + 1] div 2);
 {$IFEND}
-{$IF USettings.BaseType=btLDiff}
+{$IF BaseType=btLDiff}
       val := FrameData[i + 1, j + 1];
 {$IFEND}
-{$IF USettings.BaseType=btFrag}
+{$IF BaseType=btFrag}
       val := FrameData[i + 1, j + 1];
 {$IFEND}
 {$IFEND}
-{$IF USettings.BitNum in [1..9]}
+{$IF BitNum in [1..9]}
       val := FrameData[i + 1, j + 1];
 {$IFEND}
-      // val := DecodePixel(FrameData[i + 1, j + 1]);
       pr[3 * j] := val;
       pr[3 * j + 1] := val;
       pr[3 * j + 2] := val;
@@ -213,6 +221,87 @@ begin
   SealFrameBase;
 end;
 
+procedure DropToList;
+  procedure Qsort(L, R: LongWord);
+  var
+    w, x: UElem.TRElem;
+    i, j: LongWord;
+  begin
+    i := L;
+    j := R;
+    x := GlobalBase[(L + R) div 2]^;
+    repeat
+      while UElem.CompareElem(GlobalBase[i]^.elem, x.elem) = 0 do
+        i := i + 1;
+      while UElem.CompareElem(x.elem, GlobalBase[j]^.elem) = 0 do
+        j := j - 1;
+      if i <= j then
+      begin
+        w := GlobalBase[i]^;
+        GlobalBase[i]^ := GlobalBase[j]^;
+        GlobalBase[j]^ := w;
+        i := i + 1;
+        j := j - 1;
+      end;
+    until i > j;
+    if L < j then
+      Qsort(L, j);
+    if i < R then
+      Qsort(i, R);
+  end;
+  procedure InsertAfter(elem: TPRListElem; newFrag: UElem.TRElem);
+  var
+    NewElem, tmp: TPRListElem;
+  begin
+    NEW(NewElem);
+    NewElem^.frag := newFrag;
+    tmp := elem^.next;
+    elem^.next := NewElem;
+    NewElem^.next := tmp;
+    tmp^.prev := NewElem;
+    NewElem^.prev := elem;
+  end;
+
+var
+  tmpFrag: TRElem;
+  tmp: TPRListElem;
+  i: LongWord;
+begin
+  Qsort(1, BASE_COUNT);
+  tmp := DLF;
+  i := 0;
+  while i < BASE_COUNT do
+  begin
+    i := i + 1;
+    tmpFrag := GlobalBase[i]^;
+    while (tmp^.next <> DLL) and (UElem.CompareElem(tmp^.frag.elem, tmpFrag.elem) = 0) do
+      tmp := tmp^.next;
+    if UElem.CompareElem(tmp^.frag.elem, tmpFrag.elem) = 1 then
+    begin
+      while UElem.CompareElem(tmp^.frag.elem, tmpFrag.elem) = 1 do
+      begin
+        tmp^.frag.count := tmp^.frag.count + tmpFrag.count;
+        i := i + 1;
+        if GlobalBase[i] = nil then
+          break;
+        tmpFrag := GlobalBase[i]^;
+      end;
+      i := i - 1;
+    end
+    else
+    begin
+      InsertAfter(tmp, tmpFrag);
+      tmp := tmp^.next;
+    end;
+  end;
+  for i := 1 to MAX_BASE_COUNT do
+  begin
+    dispose(GlobalBase[i]);
+    GlobalBase[i] := nil;
+  end;
+  BASE_COUNT := 0;
+end;
+
 procedure AddToBase;
 var
   i: LongWord;
@@ -268,8 +357,12 @@ begin
   NEW(DLL);
   DLF^.prev := nil;
   DLF^.next := DLL;
+  for i := 1 to UGlobal.ElemSize do
+    DLF^.frag.elem[i] := -300;
   DLL^.prev := DLF;
   DLL^.next := nil;
+  for i := 1 to UGlobal.ElemSize do
+    DLL^.frag.elem[i] := 300;
 
   BMIn := Vcl.Graphics.TBitMap.Create;
   BMIn.Width := UGlobal.PicW;
@@ -282,109 +375,14 @@ begin
   BMOut.PixelFormat := pf24bit;
 end;
 
-procedure DropToList;
-  procedure SealGlobalBase;
-    procedure QuickSort;
-      procedure sort(L, R: LongWord);
-      var
-        w, x: UElem.TRElem;
-        i, j: LongWord;
-      begin
-        i := L;
-        j := R;
-        x := GlobalBase[(L + R) div 2]^;
-        repeat
-          while UElem.CompareElem(GlobalBase[i]^.elem, x.elem) = 0 do
-            i := i + 1;
-          while UElem.CompareElem(x.elem, GlobalBase[j]^.elem) = 0 do
-            j := j - 1;
-          if i <= j then
-          begin
-            w := GlobalBase[i]^;
-            GlobalBase[i]^ := GlobalBase[j]^;
-            GlobalBase[j]^ := w;
-            i := i + 1;
-            j := j - 1;
-          end;
-        until i > j;
-        if L < j then
-          sort(L, j);
-        if i < R then
-          sort(i, R);
-      end;
-
-    begin
-      sort(1, BASE_COUNT);
-    end;
-
-  var
-    i, k: LongWord;
-  begin
-    QuickSort;
-
-    k := 1;
-    for i := 2 to BASE_COUNT do
-    begin
-      if UElem.CompareElem(GlobalBase[i]^.elem, GlobalBase[k]^.elem) = 1 then
-        GlobalBase[k]^.count := GlobalBase[k]^.count + GlobalBase[i]^.count
-      else
-      begin
-        k := k + 1;
-        GlobalBase[k]^.elem := GlobalBase[i]^.elem;
-        GlobalBase[k]^.count := GlobalBase[i]^.count;
-      end;
-      if i <> k then
-      begin
-        GlobalBase[i].count := 0;
-      end;
-    end;
-    BASE_COUNT := k;
-  end;
-  procedure InsertAfter(elem: TPRListElem; newFrag: UElem.TRElem);
-  var
-    NewElem, tmp: TPRListElem;
-  begin
-    NEW(NewElem);
-    NewElem^.frag := newFrag;
-    tmp := elem^.next;
-    elem^.next := NewElem;
-    NewElem^.next := tmp;
-    tmp^.prev := NewElem;
-    NewElem^.prev := elem;
-  end;
-
-var
-  tmpFrag: TRElem;
-  tmp: TPRListElem;
-  i: LongWord;
-begin
-  SealGlobalBase;
-  tmp := DLF;
-  for i := 1 to BASE_COUNT do
-  begin
-    if GlobalBase[i]^.count = 0 then
-      continue;
-    tmpFrag := GlobalBase[i]^;
-    while (tmp^.next <> DLL) and (UElem.CompareElem(tmp^.frag.elem, tmpFrag.elem) = 0) do
-      tmp := tmp^.next;
-    InsertAfter(tmp, tmpFrag);
-  end;
-  Sleep(1);
-  for i := 1 to MAX_BASE_COUNT do
-  begin
-    dispose(GlobalBase[i]);
-    GlobalBase[i] := nil;
-  end;
-  BASE_COUNT := 0;
-end;
-
 procedure WriteList;
 var
   FileName: string;
   FS: TFIleStream;
   elem: TPRListElem;
 begin
-  FileName := USettings.FileName;
+  DropToList;
+  FileName := USettings.BaseName;
   FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
 
   elem := DLF^.next;

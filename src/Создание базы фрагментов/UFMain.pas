@@ -45,26 +45,28 @@ var
   SegCount, SegNum: word;
   i: word;
 begin
-  if paramcount = 2 then
+  if paramcount = 1 then
   begin
     USettings.FileName := ParamStr(1);
-    FMain.Caption := USettings.FileName;
-    FMain.Caption := FMain.Caption + ' ' + 'Создание базы элементов';
+    FMain.Caption := USettings.FileName + ' создание базы элементов';
 
-    FMain.Caption := FMain.Caption + ' ' + ParamStr(2);
-    if ParamStr(2) = 'RGB.R' then
-      USettings.BaseColor := RGB_R;
-    if ParamStr(2) = 'RGB.G' then
-      USettings.BaseColor := RGB_G;
-    if ParamStr(2) = 'RGB.B' then
-      USettings.BaseColor := RGB_B;
-    if ParamStr(2) = 'YIQ.Y' then
-      USettings.BaseColor := YIQ_Y;
-    if ParamStr(2) = 'YIQ.I' then
-      USettings.BaseColor := USettings.YIQ_I;
-    if ParamStr(2) = 'YIQ.Q' then
-      USettings.BaseColor := YIQ_Q;
-  end;
+    USettings.BaseName := USettings.FileName;
+{$IF UGlobal.BaseType=btFrag}
+    USettings.BaseName := USettings.BaseName + '_FR';
+{$IFEND}
+{$IF UGlobal.BaseType=btLDiff}
+    USettings.BaseName := USettings.BaseName + '_LD';
+{$IFEND}
+{$IF UGlobal.BaseType=btMDiff}
+    USettings.BaseName := USettings.BaseName + '_MD';
+{$IFEND}
+    USettings.BaseName := USettings.BaseName + '_'+inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
+{$IF UGlobal.BitNum > 0}
+    USettings.FileName := USettings.FileName + 'BP' + inttostr(UGlobal.BitNum);
+{$IFEND}
+  end
+  else
+    Exit;
 
   SegCount := 0;
   while FileExists(GetFullSegmentName(string(USettings.FileName), SegCount)) do
@@ -99,14 +101,7 @@ begin
       end;
       MP.Close;
     end;
-    UProcess.DropToList;
   end;
-  USettings.FileName := ParamStr(1) + '_';
-  USettings.FileName := USettings.FileName + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_';
-  if USettings.BitNum > 1 then
-    USettings.FileName := USettings.FileName + 'BP' + inttostr(USettings.BitNum)
-  else
-    USettings.FileName := USettings.FileName + 'COL';
   UProcess.WriteList;
   FMain.Close;
 end;
