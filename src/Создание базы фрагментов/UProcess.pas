@@ -159,9 +159,9 @@ procedure CreateFrameBase;
         j := R;
         x := FrameBase[(L + R) div 2];
         repeat
-          while UElem.CompareFrag(FrameBase[i].frag, x.frag) = 0 do
+          while UElem.CompareFrag(FrameBase[i].elem, x.elem) = 0 do
             i := i + 1;
-          while UElem.CompareFrag(x.frag, FrameBase[j].frag) = 0 do
+          while UElem.CompareFrag(x.elem, FrameBase[j].elem) = 0 do
             j := j - 1;
           if i <= j then
           begin
@@ -189,12 +189,12 @@ procedure CreateFrameBase;
     k := 1;
     for i := 2 to UGlobal.FrameBaseSize do
     begin
-      if UElem.CompareFrag(FrameBase[i].frag, FrameBase[k].frag) = 1 then
+      if UElem.CompareFrag(FrameBase[i].elem, FrameBase[k].elem) = 1 then
         FrameBase[k].count := FrameBase[k].count + 1
       else
       begin
         k := k + 1;
-        FrameBase[k].frag := FrameBase[i].frag;
+        FrameBase[k].elem := FrameBase[i].elem;
         FrameBase[k].count := FrameBase[i].count;
       end;
       if i <> k then
@@ -217,7 +217,7 @@ begin
       for i := row to row + (UGlobal.FragH - 1) do
         for j := col to col + (UGlobal.FragW - 1) do
         begin
-          FrameBase[k].frag[p] := FrameData[i, j];
+          FrameBase[k].elem[p] := FrameData[i, j];
           p := p + 1;
         end;
 
@@ -242,7 +242,7 @@ begin
   begin
     BASE_COUNT := BASE_COUNT + 1;
     GlobalBase[BASE_COUNT] := NEW(UElem.TPRFrag);
-    GlobalBase[BASE_COUNT]^.frag := FrameBase[i].frag;
+    GlobalBase[BASE_COUNT]^.elem := FrameBase[i].elem;
     GlobalBase[BASE_COUNT]^.count := FrameBase[i].count;
     i := i + 1;
   end;
@@ -312,9 +312,9 @@ procedure DropToList;
         j := R;
         x := GlobalBase[(L + R) div 2]^;
         repeat
-          while UElem.CompareFrag(GlobalBase[i]^.frag, x.frag) = 0 do
+          while UElem.CompareFrag(GlobalBase[i]^.elem, x.elem) = 0 do
             i := i + 1;
-          while UElem.CompareFrag(x.frag, GlobalBase[j]^.frag) = 0 do
+          while UElem.CompareFrag(x.elem, GlobalBase[j]^.elem) = 0 do
             j := j - 1;
           if i <= j then
           begin
@@ -343,12 +343,12 @@ procedure DropToList;
     k := 1;
     for i := 2 to BASE_COUNT do
     begin
-      if UElem.CompareFrag(GlobalBase[i]^.frag, GlobalBase[k]^.frag) = 1 then
+      if UElem.CompareFrag(GlobalBase[i]^.elem, GlobalBase[k]^.elem) = 1 then
         GlobalBase[k]^.count := GlobalBase[k]^.count + GlobalBase[i]^.count
       else
       begin
         k := k + 1;
-        GlobalBase[k]^.frag := GlobalBase[i]^.frag;
+        GlobalBase[k]^.elem := GlobalBase[i]^.elem;
         GlobalBase[k]^.count := GlobalBase[i]^.count;
       end;
       if i <> k then
@@ -383,7 +383,7 @@ begin
     if GlobalBase[i]^.count = 0 then
       continue;
     tmpFrag := GlobalBase[i]^;
-    while (tmp^.next <> DLL) and (UElem.CompareFrag(tmp^.frag.frag, tmpFrag.frag) = 0) do
+    while (tmp^.next <> DLL) and (UElem.CompareFrag(tmp^.frag.elem, tmpFrag.elem) = 0) do
       tmp := tmp^.next;
     InsertAfter(tmp, tmpFrag);
   end;

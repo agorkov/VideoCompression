@@ -6,20 +6,20 @@ uses
   UGlobal;
 
 type
-  TFrag = array [1 .. UGlobal.FragSize] of integer;
+  TElem = array [1 .. UGlobal.FragSize] of integer;
 
   TPRFrag = ^TRFrag;
 
   TRFrag = record
-    frag: TFrag;
+    elem: TElem;
     count: int64;
   end;
 
-function CompareFrag(f1, f2: TFrag): byte;
+function CompareFrag(f1, f2: TElem): byte;
 
 implementation
 
-function CompareFrag(f1, f2: TFrag): byte;
+function CompareFrag(f1, f2: TElem): byte;
 var
   i: byte;
   r: byte;

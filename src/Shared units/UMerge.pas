@@ -24,30 +24,30 @@ end;
 
 procedure CreateFragment(var frag1, frag2, F: TRFrag; var fl1, fl2: boolean);
 begin
-  if UElem.CompareFrag(frag1.frag, frag2.frag) = 0 then
+  if UElem.CompareFrag(frag1.elem, frag2.elem) = 0 then
   begin
-    F.frag := frag1.frag;
+    F.elem := frag1.elem;
     F.Count := frag1.Count;
     fl1 := true;
     fl2 := false;
   end;
-  if UElem.CompareFrag(frag1.frag, frag2.frag) = 1 then
+  if UElem.CompareFrag(frag1.elem, frag2.elem) = 1 then
   begin
-    F.frag := frag1.frag;
+    F.elem := frag1.elem;
     F.Count := frag1.Count + frag2.Count;
     fl1 := true;
     fl2 := true;
   end;
-  if UElem.CompareFrag(frag1.frag, frag2.frag) = 2 then
+  if UElem.CompareFrag(frag1.elem, frag2.elem) = 2 then
   begin
-    F.frag := frag2.frag;
+    F.elem := frag2.elem;
     F.Count := frag2.Count;
     fl1 := false;
     fl2 := true;
   end;
-  if UElem.CompareFrag(F.frag, frag1.frag) = 1 then
+  if UElem.CompareFrag(F.elem, frag1.elem) = 1 then
     frag1.Count := 0;
-  if UElem.CompareFrag(F.frag, frag2.frag) = 1 then
+  if UElem.CompareFrag(F.elem, frag2.elem) = 1 then
     frag2.Count := 0;
 end;
 
