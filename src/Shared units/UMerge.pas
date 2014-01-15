@@ -13,47 +13,47 @@ uses
 var
   f1, f2, fb: TFileStream;
   fl1, fl2: boolean;
-  frag1, frag2, frag: TRFrag;
+  frag1, frag2, frag: TRElem;
   c1, c2, cb, uniq: int64;
 
-procedure ReadFragment(var _FS: TFileStream; var F: TRFrag; var Count: int64);
+procedure ReadFragment(var _FS: TFileStream; var F: TRElem; var Count: int64);
 begin
-  _FS.Read(F, sizeof(TRFrag));
+  _FS.Read(F, sizeof(TRElem));
   Count := Count + F.Count;
 end;
 
-procedure CreateFragment(var frag1, frag2, F: TRFrag; var fl1, fl2: boolean);
+procedure CreateFragment(var frag1, frag2, F: TRElem; var fl1, fl2: boolean);
 begin
-  if UElem.CompareFrag(frag1.elem, frag2.elem) = 0 then
+  if UElem.CompareElem(frag1.elem, frag2.elem) = 0 then
   begin
     F.elem := frag1.elem;
     F.Count := frag1.Count;
     fl1 := true;
     fl2 := false;
   end;
-  if UElem.CompareFrag(frag1.elem, frag2.elem) = 1 then
+  if UElem.CompareElem(frag1.elem, frag2.elem) = 1 then
   begin
     F.elem := frag1.elem;
     F.Count := frag1.Count + frag2.Count;
     fl1 := true;
     fl2 := true;
   end;
-  if UElem.CompareFrag(frag1.elem, frag2.elem) = 2 then
+  if UElem.CompareElem(frag1.elem, frag2.elem) = 2 then
   begin
     F.elem := frag2.elem;
     F.Count := frag2.Count;
     fl1 := false;
     fl2 := true;
   end;
-  if UElem.CompareFrag(F.elem, frag1.elem) = 1 then
+  if UElem.CompareElem(F.elem, frag1.elem) = 1 then
     frag1.Count := 0;
-  if UElem.CompareFrag(F.elem, frag2.elem) = 1 then
+  if UElem.CompareElem(F.elem, frag2.elem) = 1 then
     frag2.Count := 0;
 end;
 
-procedure WriteFragment(F: TRFrag; var Count: int64);
+procedure WriteFragment(F: TRElem; var Count: int64);
 begin
-  fb.Write(F, sizeof(TRFrag));
+  fb.Write(F, sizeof(TRElem));
   Count := Count + F.Count;
   uniq := uniq + 1;
 end;

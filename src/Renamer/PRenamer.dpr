@@ -11,17 +11,17 @@ uses
 begin
   try
     if USettings.BitNum = 0 then
-      RenameFile('GetBaseInfo.exe', 'GBI_COL_' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_' + inttostr(UGlobal.bpp) + '.exe')
+      RenameFile('GetBaseInfo.exe', 'GBI_COL_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_' + inttostr(UGlobal.bpp) + '.exe')
     else
-      RenameFile('GetBaseInfo.exe', 'GBI_BP_' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '.exe');
+      RenameFile('GetBaseInfo.exe', 'GBI_BP_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '.exe');
     if USettings.BitNum = 0 then
-      RenameFile('GetBase.exe', 'GB_COL_' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_' + inttostr(UGlobal.bpp) + '.exe')
+      RenameFile('GetBase.exe', 'GB_COL_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_' + inttostr(UGlobal.bpp) + '.exe')
     else
-      RenameFile('GetBase.exe', 'GB_BP_' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_' + inttostr(USettings.BitNum) + '.exe');
+      RenameFile('GetBase.exe', 'GB_BP_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_' + inttostr(USettings.BitNum) + '.exe');
     if USettings.BitNum = 0 then
-      RenameFile('MergeBases.exe', 'MB_COL_' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_' + inttostr(UGlobal.bpp) + '.exe')
+      RenameFile('MergeBases.exe', 'MB_COL_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_' + inttostr(UGlobal.bpp) + '.exe')
     else
-      RenameFile('MergeBases.exe', 'MB_BP_' + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '.exe')
+      RenameFile('MergeBases.exe', 'MB_BP_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '.exe')
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

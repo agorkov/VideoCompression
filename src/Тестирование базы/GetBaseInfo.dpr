@@ -12,19 +12,19 @@ uses
   UList in 'UList.pas';
 
 const
-  FragLength = UGlobal.FragH * UGlobal.FragW * UGlobal.bpp;
+  FragLength = UGlobal.ElemH * UGlobal.ElemW * UGlobal.bpp;
 
 procedure LoadData(var L: TRList);
 var
   FS: TFileStream;
-  tmpFrag: TRFrag;
+  tmpFrag: TRElem;
   m: int64;
 begin
   InitList(L);
   FS := TFileStream.Create(Paramstr(1) + '.base', fmOpenRead);
   while not(FS.Position >= FS.Size) do
   begin
-    FS.Read(tmpFrag, sizeof(TRFrag));
+    FS.Read(tmpFrag, sizeof(TRElem));
     m := tmpFrag.count;
     AddID(L, m, 1);
   end;
@@ -40,9 +40,9 @@ begin
   AssignFile(F, Paramstr(1) + '.txt');
   rewrite(F);
   writeln(F, 'Кадр                                   ', UGlobal.PicH, 'x', UGlobal.PicW);
-  writeln(F, 'Окно                                   ', UGlobal.FragH, 'x', UGlobal.FragW);
+  writeln(F, 'Окно                                   ', UGlobal.ElemH, 'x', UGlobal.ElemW);
   writeln(F, 'Бит на пиксел                          ', UGlobal.bpp);
-  writeln(F, 'Количество элементов в передаче        ', GetNFilm(L), ' (', GetNFilm(L) * UGlobal.FragSize / (UGlobal.PicW * UGlobal.PicH):5:4, ' кадров)');
+  writeln(F, 'Количество элементов в передаче        ', GetNFilm(L), ' (', GetNFilm(L) * UGlobal.ElemSize / (UGlobal.PicW * UGlobal.PicH):5:4, ' кадров)');
   writeln(F, 'Количество уникальных элементов в базе ', GetNBase(L));
   writeln(F, 'Энтропия базы                          ', GetEntropy(L):5:4);
   writeln(F, 'Ожидаемая степень сжатия               ', CompLevel(L, 0):5:4);

@@ -44,9 +44,7 @@ procedure TFMain.FormActivate(Sender: TObject);
 var
   SegCount, SegNum: word;
   i: word;
-  T: TDateTime;
 begin
-  T := Now;
   if paramcount = 2 then
   begin
     USettings.FileName := ParamStr(1);
@@ -104,7 +102,7 @@ begin
     UProcess.DropToList;
   end;
   USettings.FileName := ParamStr(1) + '_';
-  USettings.FileName := USettings.FileName + inttostr(UGlobal.FragH) + 'x' + inttostr(UGlobal.FragW) + '_';
+  USettings.FileName := USettings.FileName + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_';
   if USettings.BitNum > 1 then
     USettings.FileName := USettings.FileName + 'BP' + inttostr(USettings.BitNum)
   else

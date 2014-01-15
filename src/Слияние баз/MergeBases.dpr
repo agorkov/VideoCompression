@@ -24,7 +24,7 @@ var
   Uniq: int64;
 begin
   f := TFileStream.Create(BaseName, fmOpenRead);
-  Uniq := f.Size div sizeof(TRFrag);
+  Uniq := f.Size div sizeof(TRElem);
   f.Free;
   GetUniqCount := Uniq;
 end;

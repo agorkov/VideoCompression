@@ -184,7 +184,7 @@ begin
   Entropy := GetEntropy(L);
   if Entropy < 1 then
     Entropy := Entropy + 1;
-  CompLevel := NBase / NFilm * (UGlobal.FragSize * UGlobal.bpp + 2) / (UGlobal.FragSize * UGlobal.bpp) + Entropy / (UGlobal.FragSize * UGlobal.bpp) + GlueCount / NFilm;
+  CompLevel := NBase / NFilm * (UGlobal.ElemSize * UGlobal.bpp + 2) / (UGlobal.ElemSize * UGlobal.bpp) + Entropy / (UGlobal.ElemSize * UGlobal.bpp) + GlueCount / NFilm;
 end;
 
 function GetIDbyInd(L: TRList; ind: int64): int64;
