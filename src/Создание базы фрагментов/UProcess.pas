@@ -24,11 +24,11 @@ const
   FilterBase = 1;
 
 type
-  TPElem = ^TRElem;
+  TPRListElem = ^TRListElem;
 
-  TRElem = record
+  TRListElem = record
     frag: UFrag.TRFrag;
-    prev, next: TPElem;
+    prev, next: TPRListElem;
   end;
 
 var
@@ -37,7 +37,7 @@ var
   FrameBase: array [1 .. UGlobal.FrameBaseSize] of UFrag.TRFrag;
   BASE_COUNT: LongWord;
   GlobalBase: array [1 .. MAX_BASE_COUNT] of TPRFrag;
-  DLF, DLL: TPElem;
+  DLF, DLL: TPRListElem;
 
 procedure LoadFrameFromBitMap;
 var
@@ -358,9 +358,9 @@ procedure DropToList;
     end;
     BASE_COUNT := k;
   end;
-  procedure InsertAfter(elem: TPElem; newFrag: UFrag.TRFrag);
+  procedure InsertAfter(elem: TPRListElem; newFrag: UFrag.TRFrag);
   var
-    NewElem, tmp: TPElem;
+    NewElem, tmp: TPRListElem;
   begin
     NEW(NewElem);
     NewElem^.frag := newFrag;
@@ -373,7 +373,7 @@ procedure DropToList;
 
 var
   tmpFrag: TRFrag;
-  tmp: TPElem;
+  tmp: TPRListElem;
   i: LongWord;
 begin
   SealGlobalBase;
@@ -400,7 +400,7 @@ procedure WriteList;
 var
   FileName: string;
   FS: TFIleStream;
-  elem: TPElem;
+  elem: TPRListElem;
 begin
   FileName := USettings.FileName;
   FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
