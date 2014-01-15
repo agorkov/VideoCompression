@@ -5,7 +5,6 @@ uses
   UFMain in 'UFMain.pas' {FMain},
   UProcess in 'UProcess.pas',
   UGlobal in '..\Shared units\UGlobal.pas',
-  UMerge in '..\Shared units\UMerge.pas',
   USettings in 'USettings.pas',
   UFrag in '..\Shared units\UFrag.pas';
 

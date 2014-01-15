@@ -17,7 +17,7 @@ procedure WriteList;
 implementation
 
 uses
-  UGlobal, UFrag, UMerge, SysUtils, Windows, UFMain, USettings, Classes;
+  UGlobal, UFrag, SysUtils, Windows, UFMain, USettings, Classes;
 
 const
   MAX_BASE_COUNT = 150000000;

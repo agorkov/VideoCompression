@@ -118,7 +118,6 @@
 			</DCCReference>
 			<DCCReference Include="UProcess.pas"/>
 			<DCCReference Include="..\Shared units\UGlobal.pas"/>
-			<DCCReference Include="..\Shared units\UMerge.pas"/>
 			<DCCReference Include="USettings.pas"/>
 			<DCCReference Include="..\Shared units\UFrag.pas"/>
 			<BuildConfiguration Include="Release">
