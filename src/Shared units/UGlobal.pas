@@ -15,11 +15,11 @@ const
   PicW = 640; // Ширина кадра
   FrameBaseSize = PicH * PicW div ElemSize; // Количество окон в кадре
 
-  bpp = 8; // Глубина цвета
+  bpp = 1; // Глубина цвета
 
-  BaseType = btMDiff; // Тип элемента
+  BaseType = btLDiff; // Тип элемента
   BaseColor = RGB_R; // Цветовой канал
-  BitNum = 0; // Битовая плоскость для анализа
+  BitNum = 8; // Битовая плоскость для анализа
 
 implementation
 

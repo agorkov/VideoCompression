@@ -16,7 +16,7 @@ procedure WriteList;
 implementation
 
 uses
-  UGlobal, UElem, SysUtils, Windows, UFMain, USettings, Classes;
+  UGlobal, UElem, SysUtils, Windows, UFMain, USettings, Classes, UStatList;
 
 const
   MAX_BASE_COUNT = 150000000;
@@ -26,7 +26,7 @@ type
   TPRListElem = ^TRListElem;
 
   TRListElem = record
-    frag: UElem.TRElem;
+    elem: UElem.TRElem;
     prev, next: TPRListElem;
   end;
 
@@ -210,7 +210,6 @@ begin
           FrameBase[k].elem[p] := FrameData[i, j];
           p := p + 1;
         end;
-
       FrameBase[k].count := 1;
       k := k + 1;
       col := col + UGlobal.ElemW;
@@ -254,7 +253,7 @@ procedure DropToList;
     NewElem, tmp: TPRListElem;
   begin
     NEW(NewElem);
-    NewElem^.frag := newFrag;
+    NewElem^.elem := newFrag;
     tmp := elem^.next;
     elem^.next := NewElem;
     NewElem^.next := tmp;
@@ -274,13 +273,13 @@ begin
   begin
     i := i + 1;
     tmpFrag := GlobalBase[i]^;
-    while (tmp^.next <> DLL) and (UElem.CompareElem(tmp^.frag.elem, tmpFrag.elem) = 0) do
+    while (tmp^.next <> DLL) and (UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 0) do
       tmp := tmp^.next;
-    if UElem.CompareElem(tmp^.frag.elem, tmpFrag.elem) = 1 then
+    if UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 1 then
     begin
-      while UElem.CompareElem(tmp^.frag.elem, tmpFrag.elem) = 1 do
+      while UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 1 do
       begin
-        tmp^.frag.count := tmp^.frag.count + tmpFrag.count;
+        tmp^.elem.count := tmp^.elem.count + tmpFrag.count;
         i := i + 1;
         if GlobalBase[i] = nil then
           break;
@@ -358,11 +357,11 @@ begin
   DLF^.prev := nil;
   DLF^.next := DLL;
   for i := 1 to UGlobal.ElemSize do
-    DLF^.frag.elem[i] := -300;
+    DLF^.elem.elem[i] := -300;
   DLL^.prev := DLF;
   DLL^.next := nil;
   for i := 1 to UGlobal.ElemSize do
-    DLL^.frag.elem[i] := 300;
+    DLL^.elem.elem[i] := 300;
 
   BMIn := Vcl.Graphics.TBitMap.Create;
   BMIn.Width := UGlobal.PicW;
@@ -388,9 +387,11 @@ begin
   elem := DLF^.next;
   while elem <> DLL do
   begin
-    FS.Write(elem^.frag, SizeOf(UElem.TRElem));
+    FS.Write(elem^.elem, SizeOf(UElem.TRElem));
+    UStatList.AddID(elem^.elem.count);
     elem := elem^.next;
   end;
+  UStatList.WriteBaseInfo(USettings.BaseName+'.txt');
   FS.Free;
 end;
 

@@ -62,7 +62,7 @@ begin
 {$IFEND}
     USettings.BaseName := USettings.BaseName + '_'+inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
 {$IF UGlobal.BitNum > 0}
-    USettings.FileName := USettings.FileName + 'BP' + inttostr(UGlobal.BitNum);
+    USettings.BaseName := USettings.BaseName + '_BP' + inttostr(UGlobal.BitNum);
 {$IFEND}
   end
   else
