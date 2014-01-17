@@ -60,7 +60,7 @@ begin
 {$IF UGlobal.BaseType=btMDiff}
     USettings.BaseName := USettings.BaseName + '_MD';
 {$IFEND}
-    USettings.BaseName := USettings.BaseName + '_'+inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
+    USettings.BaseName := USettings.BaseName + '_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
 {$IF UGlobal.BitNum > 0}
     USettings.BaseName := USettings.BaseName + '_BP' + inttostr(UGlobal.BitNum);
 {$IFEND}
@@ -98,6 +98,7 @@ begin
         ProgressBar1.StepBy(1);
         Gauge1.Progress := UProcess.BaseFull;
         Application.ProcessMessages;
+        UProcess.BMOut.SaveToFile(USettings.BaseName + inttostr(FrameNum) + '.bmp');
       end;
       MP.Close;
     end;

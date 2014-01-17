@@ -15,11 +15,22 @@ const
   PicW = 640; // Ширина кадра
   FrameBaseSize = PicH * PicW div ElemSize; // Количество окон в кадре
 
-  bpp = 1; // Глубина цвета
-
-  BaseType = btLDiff; // Тип элемента
+  BaseType = btMDiff; // Тип элемента
+  BitNum = 0; // Битовая плоскость для анализа
   BaseColor = RGB_R; // Цветовой канал
-  BitNum = 8; // Битовая плоскость для анализа
+
+{$IF BaseType in [btFrag,btLDiff]}
+  maxBitNum = 8;
+{$IFEND}
+{$IF BaseType=btMDiff]}
+  maxBitNum = 9;
+{$IFEND}
+{$IF BitNum=0}
+  bpp = 8; // Глубина цвета
+{$IFEND}
+{$IF BitNum in [1..maxBitNum]}
+  bpp = 1; // Глубина цвета
+{$IFEND}
 
 implementation
 

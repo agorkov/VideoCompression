@@ -19,8 +19,7 @@ uses
   UGlobal, UElem, SysUtils, Windows, UFMain, USettings, Classes, UStatList;
 
 const
-  MAX_BASE_COUNT = 150000000;
-  FilterBase = 1;
+  MAX_BUFFER_SIZE = 150000000;
 
 type
   TPRListElem = ^TRListElem;
@@ -35,7 +34,7 @@ var
   FrameData: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of integer;
   FrameBase: array [1 .. UGlobal.FrameBaseSize] of UElem.TRElem;
   BASE_COUNT: LongWord;
-  GlobalBase: array [1 .. MAX_BASE_COUNT] of TPRElem;
+  elemBuffer: array [1 .. MAX_BUFFER_SIZE] of TPRElem;
   DLF, DLL: TPRListElem;
 
 procedure LoadFrameFromBitMap;
@@ -228,17 +227,17 @@ procedure DropToList;
   begin
     i := L;
     j := R;
-    x := GlobalBase[(L + R) div 2]^;
+    x := elemBuffer[(L + R) div 2]^;
     repeat
-      while UElem.CompareElem(GlobalBase[i]^.elem, x.elem) = 0 do
+      while UElem.CompareElem(elemBuffer[i]^.elem, x.elem) = 0 do
         i := i + 1;
-      while UElem.CompareElem(x.elem, GlobalBase[j]^.elem) = 0 do
+      while UElem.CompareElem(x.elem, elemBuffer[j]^.elem) = 0 do
         j := j - 1;
       if i <= j then
       begin
-        w := GlobalBase[i]^;
-        GlobalBase[i]^ := GlobalBase[j]^;
-        GlobalBase[j]^ := w;
+        w := elemBuffer[i]^;
+        elemBuffer[i]^ := elemBuffer[j]^;
+        elemBuffer[j]^ := w;
         i := i + 1;
         j := j - 1;
       end;
@@ -272,7 +271,7 @@ begin
   while i < BASE_COUNT do
   begin
     i := i + 1;
-    tmpFrag := GlobalBase[i]^;
+    tmpFrag := elemBuffer[i]^;
     while (tmp^.next <> DLL) and (UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 0) do
       tmp := tmp^.next;
     if UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 1 then
@@ -281,9 +280,9 @@ begin
       begin
         tmp^.elem.count := tmp^.elem.count + tmpFrag.count;
         i := i + 1;
-        if GlobalBase[i] = nil then
+        if elemBuffer[i] = nil then
           break;
-        tmpFrag := GlobalBase[i]^;
+        tmpFrag := elemBuffer[i]^;
       end;
       i := i - 1;
     end
@@ -293,10 +292,10 @@ begin
       tmp := tmp^.next;
     end;
   end;
-  for i := 1 to MAX_BASE_COUNT do
+  for i := 1 to MAX_BUFFER_SIZE do
   begin
-    dispose(GlobalBase[i]);
-    GlobalBase[i] := nil;
+    dispose(elemBuffer[i]);
+    elemBuffer[i] := nil;
   end;
   BASE_COUNT := 0;
 end;
@@ -305,15 +304,15 @@ procedure AddToBase;
 var
   i: LongWord;
 begin
-  if BASE_COUNT + UGlobal.FrameBaseSize > MAX_BASE_COUNT then
+  if BASE_COUNT + UGlobal.FrameBaseSize > MAX_BUFFER_SIZE then
     DropToList;
   i := 1;
   while (FrameBase[i].count > 0) and (i <= UGlobal.FrameBaseSize) do
   begin
     BASE_COUNT := BASE_COUNT + 1;
-    GlobalBase[BASE_COUNT] := NEW(UElem.TPRElem);
-    GlobalBase[BASE_COUNT]^.elem := FrameBase[i].elem;
-    GlobalBase[BASE_COUNT]^.count := FrameBase[i].count;
+    elemBuffer[BASE_COUNT] := NEW(UElem.TPRElem);
+    elemBuffer[BASE_COUNT]^.elem := FrameBase[i].elem;
+    elemBuffer[BASE_COUNT]^.count := FrameBase[i].count;
     i := i + 1;
   end;
 end;
@@ -336,9 +335,9 @@ begin
   FrameNum := 0;
 
   BASE_COUNT := 0;
-  for i := 1 to MAX_BASE_COUNT do
+  for i := 1 to MAX_BUFFER_SIZE do
   begin
-    GlobalBase[i] := nil;
+    elemBuffer[i] := nil;
   end;
 
   for i := 1 to UGlobal.FrameBaseSize do
@@ -397,7 +396,7 @@ end;
 
 function BaseFull: byte;
 begin
-  BaseFull := round(BASE_COUNT / MAX_BASE_COUNT * 100);
+  BaseFull := round(BASE_COUNT / MAX_BUFFER_SIZE * 100);
 end;
 
 initialization
