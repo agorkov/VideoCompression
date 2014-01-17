@@ -98,7 +98,6 @@ begin
         ProgressBar1.StepBy(1);
         Gauge1.Progress := UProcess.BaseFull;
         Application.ProcessMessages;
-        UProcess.BMOut.SaveToFile(USettings.BaseName + inttostr(FrameNum) + '.bmp');
       end;
       MP.Close;
     end;

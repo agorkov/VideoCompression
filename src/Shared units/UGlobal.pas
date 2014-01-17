@@ -7,7 +7,7 @@ type
   TBaseType = (btFrag, btLDiff, btMDiff); // Тип элемента
 
 const
-  ElemH = 3; // Высота окна
+  ElemH = 5; // Высота окна
   ElemW = 2; // Ширина окна
   ElemSize = ElemH * ElemW; // Размер окна
 
@@ -15,8 +15,8 @@ const
   PicW = 640; // Ширина кадра
   FrameBaseSize = PicH * PicW div ElemSize; // Количество окон в кадре
 
-  BaseType = btMDiff; // Тип элемента
-  BitNum = 0; // Битовая плоскость для анализа
+  BaseType = btLDiff; // Тип элемента
+  BitNum =8; // Битовая плоскость для анализа
   BaseColor = RGB_R; // Цветовой канал
 
 {$IF BaseType in [btFrag,btLDiff]}
