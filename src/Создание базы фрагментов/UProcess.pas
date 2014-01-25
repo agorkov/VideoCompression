@@ -19,7 +19,7 @@ uses
   UGlobal, UElem, SysUtils, Windows, UFMain, USettings, Classes, UStatList;
 
 const
-  MAX_BUFFER_SIZE = 150000000;
+  MAX_BUFFER_SIZE = 150000;
 
 type
   TPRListElem = ^TRListElem;
@@ -259,37 +259,53 @@ procedure DropToList;
     tmp^.prev := NewElem;
     NewElem^.prev := elem;
   end;
+  procedure InsertBefore(elem: TPRListElem; newFrag: UElem.TRElem);
+  var
+    NewElem, tmp: TPRListElem;
+  begin
+    NEW(NewElem);
+    NewElem^.elem := newFrag;
+    tmp := elem^.prev;
+    tmp^.next := NewElem;
+    NewElem^.next := elem;
+    elem^.prev := NewElem;
+    NewElem^.prev := tmp;
+  end;
 
 var
   tmpFrag: TRElem;
   tmp: TPRListElem;
-  i: LongWord;
+  i, k: LongWord;
 begin
   Qsort(1, BASE_COUNT);
+  k := 1;
+  for i := 2 to BASE_COUNT do
+  begin
+    if UElem.CompareElem(elemBuffer[i]^.elem, elemBuffer[k]^.elem) = 1 then
+      elemBuffer[k]^.count := elemBuffer[k]^.count + elemBuffer[i]^.count
+    else
+    begin
+      k := k + 1;
+      elemBuffer[k]^.elem := elemBuffer[i]^.elem;
+      elemBuffer[k]^.count := elemBuffer[i]^.count;
+    end;
+    if i <> k then
+      elemBuffer[i]^.count := 0;
+  end;
+  BASE_COUNT := k;
   tmp := DLF;
   i := 0;
   while i < BASE_COUNT do
   begin
     i := i + 1;
     tmpFrag := elemBuffer[i]^;
-    while (tmp^.next <> DLL) and (UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 0) do
+    while (tmp <> DLL) and (UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 0) do
       tmp := tmp^.next;
-    if UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 1 then
     begin
-      while UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 1 do
-      begin
-        tmp^.elem.count := tmp^.elem.count + tmpFrag.count;
-        i := i + 1;
-        if elemBuffer[i] = nil then
-          break;
-        tmpFrag := elemBuffer[i]^;
-      end;
-      i := i - 1;
-    end
-    else
-    begin
-      InsertAfter(tmp, tmpFrag);
-      tmp := tmp^.next;
+      if UElem.CompareElem(tmp^.elem.elem, tmpFrag.elem) = 1 then
+        tmp^.elem.count := tmp^.elem.count + tmpFrag.count
+      else
+        InsertBefore(tmp, tmpFrag);
     end;
   end;
   for i := 1 to MAX_BUFFER_SIZE do
@@ -382,7 +398,6 @@ begin
   DropToList;
   FileName := USettings.BaseName;
   FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
-
   elem := DLF^.next;
   while elem <> DLL do
   begin
@@ -390,7 +405,7 @@ begin
     UStatList.AddID(elem^.elem.count);
     elem := elem^.next;
   end;
-  UStatList.WriteBaseInfo(USettings.BaseName+'.txt');
+  UStatList.WriteBaseInfo(USettings.BaseName + '.txt');
   FS.Free;
 end;
 

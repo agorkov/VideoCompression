@@ -2,8 +2,8 @@ object FMain: TFMain
   Left = 0
   Top = 0
   Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1091#1085#1080#1082#1072#1083#1100#1085#1099#1093' '#1088#1072#1079#1085#1086#1089#1090#1077#1081
-  ClientHeight = 548
-  ClientWidth = 1303
+  ClientHeight = 449
+  ClientWidth = 1044
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -41,21 +41,21 @@ object FMain: TFMain
   PixelsPerInch = 96
   TextHeight = 13
   object Image1: TImage
-    Left = 654
+    Left = 524
     Top = 8
-    Width = 640
-    Height = 480
+    Width = 510
+    Height = 384
   end
   object Gauge1: TGauge
-    Left = 8
-    Top = 517
-    Width = 1286
+    Left = 9
+    Top = 421
+    Width = 1025
     Height = 20
     Progress = 0
   end
   object MP: TMediaPlayer
     Left = 8
-    Top = 490
+    Top = 398
     Width = 29
     Height = 30
     VisibleButtons = [btPlay]
@@ -68,14 +68,14 @@ object FMain: TFMain
   object PVideo: TPanel
     Left = 8
     Top = 8
-    Width = 640
-    Height = 480
+    Width = 510
+    Height = 384
     TabOrder = 1
   end
   object ProgressBar1: TProgressBar
     Left = 8
-    Top = 494
-    Width = 1286
+    Top = 398
+    Width = 1026
     Height = 17
     TabOrder = 2
   end

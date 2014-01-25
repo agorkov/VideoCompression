@@ -11,18 +11,6 @@ var
 
 begin
   try
-    { if BitNum = 0 then
-      RenameFile('GetBaseInfo.exe', 'GBI_COL_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_' + inttostr(UGlobal.bpp) + '.exe')
-      else
-      RenameFile('GetBaseInfo.exe', 'GBI_BP_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '.exe');
-      if BitNum = 0 then
-      RenameFile('GetBase.exe', 'GB_COL_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_' + inttostr(UGlobal.bpp) + '.exe')
-      else
-      RenameFile('GetBase.exe', 'GB_BP_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_' + inttostr(BitNum) + '.exe');
-      if BitNum = 0 then
-      RenameFile('MergeBases.exe', 'MB_COL_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '_' + inttostr(UGlobal.bpp) + '.exe')
-      else
-      RenameFile('MergeBases.exe', 'MB_BP_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW) + '.exe') }
     DeleteFile('GetBaseInfo.exe');
     DeleteFile('MergeBases.exe');
     case UGlobal.BaseType of

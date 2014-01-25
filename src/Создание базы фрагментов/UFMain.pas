@@ -48,8 +48,6 @@ begin
   if paramcount = 1 then
   begin
     USettings.FileName := ParamStr(1);
-    FMain.Caption := USettings.FileName + ' создание базы элементов';
-
     USettings.BaseName := USettings.FileName;
 {$IF UGlobal.BaseType=btFrag}
     USettings.BaseName := USettings.BaseName + '_FR';
@@ -64,9 +62,10 @@ begin
 {$IF UGlobal.BitNum > 0}
     USettings.BaseName := USettings.BaseName + '_BP' + inttostr(UGlobal.BitNum);
 {$IFEND}
+    FMain.Caption := USettings.BaseName + ' создание базы элементов';
   end
   else
-    Exit;
+    Halt;
 
   SegCount := 0;
   while FileExists(GetFullSegmentName(string(USettings.FileName), SegCount)) do
