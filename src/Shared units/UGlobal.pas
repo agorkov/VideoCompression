@@ -7,21 +7,18 @@ type
   TBaseType = (btFrag, btLDiff, btMDiff); // Тип элемента
 
 const
-  ElemH = 4; // Высота окна
-  ElemW = 6; // Ширина окна
+  ElemH = 3; // Высота окна
+  ElemW = 1; // Ширина окна
   ElemSize = ElemH * ElemW; // Размер окна
 
   PicH = 384; // Высота кадра
   PicW = 510; // Ширина кадра
   FrameBaseSize = PicH * PicW div ElemSize; // Количество окон в кадре
 
-{$IF (PicH mod ElemH <> 0) or (PicW mod ElemW <> 0)}
-  ElemH = 0;
-  ElemW = 0;
-{$IFEND}
-  BaseType = btMDiff; // Тип элемента
-  BitNum = 9; // Битовая плоскость для анализа
+  BaseType = btLDiff; // Тип элемента
+  BitNum = 0; // Битовая плоскость для анализа
   BaseColor = RGB_R; // Цветовой канал
+  GrayCode = true; //Преобразование в коды Грея
 
 {$IF BaseType in [btFrag,btLDiff]}
   maxBitNum = 8;
@@ -34,6 +31,11 @@ const
 {$IFEND}
 {$IF BitNum in [1..maxBitNum]}
   bpp = 1; // Глубина цвета
+{$IFEND}
+
+{$IF (PicH mod ElemH <> 0) or (PicW mod ElemW <> 0)}
+  ElemH = 0;
+  ElemW = 0;
 {$IFEND}
 
 implementation

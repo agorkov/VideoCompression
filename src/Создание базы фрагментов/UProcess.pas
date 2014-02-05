@@ -19,7 +19,7 @@ uses
   UGlobal, UElem, SysUtils, Windows, UFMain, USettings, Classes, UStatList;
 
 const
-  MAX_BUFFER_SIZE = 150000;
+  MAX_BUFFER_SIZE = 15000000;
 
 type
   TPRListElem = ^TRListElem;
@@ -64,6 +64,9 @@ begin
 {$IFEND}
 {$IF BaseColor=YIQ_Q}
       FrameNew[i + 1, j + 1] := round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]);
+{$IFEND}
+{$IF GrayCode}
+      FrameNew[i + 1, j + 1] := FrameNew[i + 1, j + 1] xor (FrameNew[i + 1, j + 1] shr 1);
 {$IFEND}
     end;
   end;
