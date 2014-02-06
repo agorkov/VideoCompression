@@ -18,6 +18,8 @@ begin
     btLDiff: bt := 'LD';
     btMDiff: bt := 'MD';
     end;
+    if UGlobal.GrayCode then
+      bt := bt + '_GC';
     size := inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
     if UGlobal.BitNum = 0 then
       bp := ''

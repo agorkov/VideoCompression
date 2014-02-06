@@ -7,16 +7,16 @@ type
   TBaseType = (btFrag, btLDiff, btMDiff); // Тип элемента
 
 const
-  ElemH = 3; // Высота окна
-  ElemW = 1; // Ширина окна
+  ElemH = 4; // Высота окна
+  ElemW = 2; // Ширина окна
   ElemSize = ElemH * ElemW; // Размер окна
 
-  PicH = 384; // Высота кадра
-  PicW = 510; // Ширина кадра
+  PicH = 536; // Высота кадра
+  PicW = 720; // Ширина кадра
   FrameBaseSize = PicH * PicW div ElemSize; // Количество окон в кадре
 
   BaseType = btLDiff; // Тип элемента
-  BitNum = 0; // Битовая плоскость для анализа
+  BitNum = 7; // Битовая плоскость для анализа
   BaseColor = RGB_R; // Цветовой канал
   GrayCode = true; //Преобразование в коды Грея
 

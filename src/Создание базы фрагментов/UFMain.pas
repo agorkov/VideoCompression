@@ -45,6 +45,26 @@ var
   SegCount, SegNum: word;
   i: word;
 begin
+  FMain.ClientWidth := 2 * PicW + 3 * 8;
+  FMain.ClientHeight := PicH + 2 * 20 + 4 * 8;
+
+  PVideo.Height := PicH;
+  PVideo.Width := PicW;
+  PVideo.Top := 8;
+  PVideo.Left := 8;
+
+  Image1.Height := PicH;
+  Image1.Width := PicW;
+  Image1.Top := 8;
+  Image1.Left := 8 + PVideo.Width + 8;
+
+  ProgressBar1.Width := 2 * PicW + 8;
+  ProgressBar1.Left:=8;
+  ProgressBar1.Top:=8+PicH+8;
+  Gauge1.Width := 2 * PicW + 8;
+  Gauge1.Left:=8;
+  Gauge1.Top:=8+PicH+8+20+8;
+
   if paramcount = 1 then
   begin
     USettings.FileName := ParamStr(1);
@@ -57,6 +77,9 @@ begin
 {$IFEND}
 {$IF UGlobal.BaseType=btMDiff}
     USettings.BaseName := USettings.BaseName + '_MD';
+{$IFEND}
+{$IF UGlobal.GrayCode}
+    USettings.BaseName := USettings.BaseName + '_GC';
 {$IFEND}
     USettings.BaseName := USettings.BaseName + '_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
 {$IF UGlobal.BitNum > 0}
