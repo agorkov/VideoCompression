@@ -37,6 +37,76 @@ var
   elemBuffer: array [1 .. MAX_BUFFER_SIZE] of TPRElem;
   DLF, DLL: TPRListElem;
 
+function GetPixelValue(i, j: integer): byte;
+begin
+  if i < 1 then
+    i := 1;
+  if i > UGlobal.PicH then
+    i := UGlobal.PicH;
+  if j < 1 then
+    j := 1;
+  if j > UGlobal.PicW then
+    j := UGlobal.PicW;
+  GetPixelValue := FrameNew[i, j];
+end;
+
+procedure AVG_Filter(h, w: word);
+var
+  i, j: word;
+  fi, fj: integer;
+  sum: LongWord;
+  GSIR: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
+begin
+  for i := 1 to UGlobal.PicH do
+    for j := 1 to UGlobal.PicW do
+    begin
+      sum := 0;
+      for fi := -h to h do
+        for fj := -w to w do
+          sum := sum + GetPixelValue(i + fi, j + fj);
+      GSIR[i, j] := round(sum / ((2 * h + 1) * (2 * w + 1)));
+    end;
+  for i := 1 to UGlobal.PicH do
+    for j := 1 to UGlobal.PicW do
+      FrameNew[i, j] := GSIR[i, j];
+end;
+
+procedure MedianFilter(h, w: word);
+var
+  i, j: word;
+  fi, fj: integer;
+  GSIR: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
+  k, l: word;
+  val: byte;
+  tmp: array of byte;
+begin
+  SetLength(tmp, (2 * h + 1) * (2 * w + 1) + 1);
+  for i := 1 to UGlobal.PicH do
+    for j := 1 to UGlobal.PicW do
+    begin
+      k := 0;
+      for fi := -h to h do
+        for fj := -w to w do
+        begin
+          k := k + 1;
+          tmp[k] := GetPixelValue(i + fi, j + fj);
+        end;
+      for k := 1 to (2 * h + 1) * (2 * w + 1) - 1 do
+        for l := k + 1 to (2 * h + 1) * (2 * w + 1) do
+          if tmp[k] > tmp[l] then
+          begin
+            val := tmp[k];
+            tmp[k] := tmp[l];
+            tmp[l] := val;
+          end;
+      GSIR[i, j] := tmp[((2 * h + 1) * (2 * w + 1) div 2) + 1];
+    end;
+  tmp := nil;
+  for i := 1 to UGlobal.PicH do
+    for j := 1 to UGlobal.PicW do
+      FrameNew[i, j] := GSIR[i, j];
+end;
+
 procedure LoadFrameFromBitMap;
 var
   i, j: LongWord;
@@ -142,14 +212,14 @@ end;
 procedure CreateFrameBase;
   procedure SealFrameBase();
     procedure QuickSort;
-      procedure sort(L, R: LongWord);
+      procedure sort(l, R: LongWord);
       var
         w, x: UElem.TRElem;
         i, j: LongWord;
       begin
-        i := L;
+        i := l;
         j := R;
-        x := FrameBase[(L + R) div 2];
+        x := FrameBase[(l + R) div 2];
         repeat
           while UElem.CompareElem(FrameBase[i].elem, x.elem) = 0 do
             i := i + 1;
@@ -164,8 +234,8 @@ procedure CreateFrameBase;
             j := j - 1;
           end;
         until i > j;
-        if L < j then
-          sort(L, j);
+        if l < j then
+          sort(l, j);
         if i < R then
           sort(i, R);
       end;
@@ -223,14 +293,14 @@ begin
 end;
 
 procedure DropToList;
-  procedure Qsort(L, R: LongWord);
+  procedure Qsort(l, R: LongWord);
   var
     w, x: UElem.TRElem;
     i, j: LongWord;
   begin
-    i := L;
+    i := l;
     j := R;
-    x := elemBuffer[(L + R) div 2]^;
+    x := elemBuffer[(l + R) div 2]^;
     repeat
       while UElem.CompareElem(elemBuffer[i]^.elem, x.elem) = 0 do
         i := i + 1;
@@ -245,8 +315,8 @@ procedure DropToList;
         j := j - 1;
       end;
     until i > j;
-    if L < j then
-      Qsort(L, j);
+    if l < j then
+      Qsort(l, j);
     if i < R then
       Qsort(i, R);
   end;
@@ -340,6 +410,12 @@ procedure ProcessFrame;
 begin
   FrameOld := FrameNew;
   LoadFrameFromBitMap;
+{$IF UGlobal.FilterType=ftAVG}
+  AVG_Filter(FilterH, FilterW);
+{$IFEND}
+{$IF UGlobal.FilterType=ftMedian}
+  MedianFilter(FilterH, FilterW);
+{$IFEND}
   CreateFrameData;
   ShowResultFrame;
   CreateFrameBase;

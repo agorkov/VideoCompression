@@ -59,11 +59,11 @@ begin
   Image1.Left := 8 + PVideo.Width + 8;
 
   ProgressBar1.Width := 2 * PicW + 8;
-  ProgressBar1.Left:=8;
-  ProgressBar1.Top:=8+PicH+8;
+  ProgressBar1.Left := 8;
+  ProgressBar1.Top := 8 + PicH + 8;
   Gauge1.Width := 2 * PicW + 8;
-  Gauge1.Left:=8;
-  Gauge1.Top:=8+PicH+8+20+8;
+  Gauge1.Left := 8;
+  Gauge1.Top := 8 + PicH + 8 + 20 + 8;
 
   if paramcount = 1 then
   begin
