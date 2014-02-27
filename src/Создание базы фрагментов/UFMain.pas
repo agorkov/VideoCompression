@@ -44,6 +44,7 @@ procedure TFMain.FormActivate(Sender: TObject);
 var
   SegCount, SegNum: word;
   i: word;
+  tmp: string;
 begin
   FMain.ClientWidth := 2 * PicW + 3 * 8;
   FMain.ClientHeight := PicH + 2 * 20 + 4 * 8;
@@ -65,26 +66,77 @@ begin
   Gauge1.Left := 8;
   Gauge1.Top := 8 + PicH + 8 + 20 + 8;
 
-  if paramcount = 1 then
+  if paramcount = 6 then
   begin
     USettings.FileName := ParamStr(1);
     USettings.BaseName := USettings.FileName;
-{$IF UGlobal.BaseType=btFrag}
-    USettings.BaseName := USettings.BaseName + '_FR';
-{$IFEND}
-{$IF UGlobal.BaseType=btLDiff}
-    USettings.BaseName := USettings.BaseName + '_LD';
-{$IFEND}
-{$IF UGlobal.BaseType=btMDiff}
-    USettings.BaseName := USettings.BaseName + '_MD';
-{$IFEND}
-{$IF UGlobal.GrayCode}
-    USettings.BaseName := USettings.BaseName + '_GC';
-{$IFEND}
-    USettings.BaseName := USettings.BaseName + '_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
-{$IF UGlobal.BitNum > 0}
+
+    if ParamStr(2) = 'RGB.R' then
+      UGlobal.BaseColor := RGB_R;
+    if ParamStr(2) = 'RGB.G' then
+      UGlobal.BaseColor := RGB_G;
+    if ParamStr(2) = 'RGB.B' then
+      UGlobal.BaseColor := RGB_B;
+    if ParamStr(2) = 'YIQ.Y' then
+      UGlobal.BaseColor := YIQ_Y;
+    if ParamStr(2) = 'YIQ.I' then
+      UGlobal.BaseColor := YIQ_I;
+    if ParamStr(2) = 'YIQ.Q' then
+      UGlobal.BaseColor := YIQ_Q;
+    USettings.BaseName := USettings.BaseName + '_' + ParamStr(2);
+
+    if ParamStr(3) = 'FR' then
+      BaseType := btFrag;
+    if ParamStr(3) = 'LD' then
+      BaseType := btLDiff;
+    if ParamStr(3) = 'MD' then
+      BaseType := btMDiff;
+    if UGlobal.BaseType = btFrag then
+      USettings.BaseName := USettings.BaseName + '_FR';
+    if UGlobal.BaseType = btLDiff then
+      USettings.BaseName := USettings.BaseName + '_LD';
+    if UGlobal.BaseType = btMDiff then
+      USettings.BaseName := USettings.BaseName + '_MD';
+
+    if ParamStr(4) = '+GC' then
+      UGlobal.GrayCode := true
+    else
+      UGlobal.GrayCode := false;
+    if UGlobal.GrayCode then
+      USettings.BaseName := USettings.BaseName + '_GC';
+
+    tmp := ParamStr(5);
+    delete(tmp, 1, 2);
+    UGlobal.BitNum := strtoint(tmp);
+    if UGlobal.BitNum = 0 then
+      UGlobal.bpp := 8
+    else
+      UGlobal.bpp := 1;
     USettings.BaseName := USettings.BaseName + '_BP' + inttostr(UGlobal.BitNum);
-{$IFEND}
+
+    tmp := ParamStr(6);
+    if tmp[1] = 'A' then
+    begin
+      UGlobal.FilterType := ftAVG;
+      USettings.BaseName := USettings.BaseName + '_' + tmp;
+    end;
+    if tmp[1] = 'M' then
+    begin
+      UGlobal.FilterType := ftMedian;
+      USettings.BaseName := USettings.BaseName + '_' + tmp;
+    end;
+    if tmp[1] = 'T' then
+    begin
+      UGlobal.FilterType := ftThresold;
+      USettings.BaseName := USettings.BaseName + '_' + tmp;
+    end;
+    delete(tmp, 1, 1);
+    if length(tmp) > 0 then
+      UGlobal.FilterParam := strtoint(tmp)
+    else
+      UGlobal.FilterParam := 0;
+
+    USettings.BaseName := USettings.BaseName + '_' + inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
     FMain.Caption := USettings.BaseName + ' создание базы элементов';
   end
   else

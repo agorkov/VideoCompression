@@ -111,15 +111,12 @@ begin
   NFilm := GetNFilm();
   Entropy := GetEntropy();
   ElemBitLength := UGlobal.ElemSize * UGlobal.bpp;
-{$IF UGlobal.BaseType=btFrag}
-  CompLevel := (NBase * (ElemBitLength + 2)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
-{$IFEND}
-{$IF UGlobal.BaseType=btLDiff}
-  CompLevel := (NBase * (ElemBitLength + 2)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
-{$IFEND}
-{$IF UGlobal.BaseType=btMDiff}
-  CompLevel := (NBase * (ElemBitLength + 2 + UGlobal.ElemSize)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
-{$IFEND}
+  if UGlobal.BaseType = btFrag then
+    CompLevel := (NBase * (ElemBitLength + 2)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
+  if UGlobal.BaseType = btLDiff then
+    CompLevel := (NBase * (ElemBitLength + 2)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
+  if UGlobal.BaseType = btMDiff then
+    CompLevel := (NBase * (ElemBitLength + 2 + UGlobal.ElemSize)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
 end;
 
 procedure InitList;
@@ -183,6 +180,6 @@ InitList;
 
 finalization
 
-//EmptyList;
+// EmptyList;
 
 end.

@@ -29,8 +29,10 @@ type
     prev, next: TPRListElem;
   end;
 
+  TFrame = array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
+
 var
-  FrameOld, FrameNew: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
+  FrameOld, FrameNew: TFrame;
   FrameData: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of integer;
   FrameBase: array [1 .. UGlobal.FrameBaseSize] of UElem.TRElem;
   BASE_COUNT: LongWord;
@@ -55,7 +57,7 @@ var
   i, j: word;
   fi, fj: integer;
   sum: LongWord;
-  GSIR: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
+  GSIR: TFrame;
 begin
   for i := 1 to UGlobal.PicH do
     for j := 1 to UGlobal.PicW do
@@ -66,12 +68,13 @@ begin
           sum := sum + GetPixelValue(i + fi, j + fj);
       GSIR[i, j] := round(sum / ((2 * h + 1) * (2 * w + 1)));
     end;
-  for i := 1 to UGlobal.PicH do
+  FrameNew := GSIR;
+  { for i := 1 to UGlobal.PicH do
     for j := 1 to UGlobal.PicW do
-      FrameNew[i, j] := GSIR[i, j];
+    FrameNew[i, j] := GSIR[i, j]; }
 end;
 
-procedure MedianFilter(h, w: word);
+procedure Median_Filter(h, w: word);
 var
   i, j: word;
   fi, fj: integer;
@@ -107,6 +110,18 @@ begin
       FrameNew[i, j] := GSIR[i, j];
 end;
 
+procedure Thresold_Filter(Thresold: word);
+var
+  i, j: word;
+begin
+  for i := 1 to UGlobal.PicH do
+    for j := 1 to UGlobal.PicW do
+    begin
+      if Abs(FrameOld[i, j] - FrameNew[i, j]) < Thresold then
+        FrameNew[i, j] := FrameOld[i, j];
+    end;
+end;
+
 procedure LoadFrameFromBitMap;
 var
   i, j: LongWord;
@@ -117,27 +132,16 @@ begin
     p := BMIn.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-{$IF BaseColor=RGB_R}
-      FrameNew[i + 1, j + 1] := p[3 * j + 2];
-{$IFEND}
-{$IF BaseColor=RGB_G}
-      FrameNew[i + 1, j + 1] := p[3 * j + 1];
-{$IFEND}
-{$IF BaseColor=RGB_B}
-      FrameNew[i + 1, j + 1] := p[3 * j];
-{$IFEND}
-{$IF BaseColor=YIQ_Y}
-      FrameNew[i + 1, j + 1] := round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]);
-{$IFEND}
-{$IF BaseColor=YIQ_I}
-      FrameNew[i + 1, j + 1] := round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]);
-{$IFEND}
-{$IF BaseColor=YIQ_Q}
-      FrameNew[i + 1, j + 1] := round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]);
-{$IFEND}
-{$IF GrayCode}
-      FrameNew[i + 1, j + 1] := FrameNew[i + 1, j + 1] xor (FrameNew[i + 1, j + 1] shr 1);
-{$IFEND}
+      case BaseColor of
+      RGB_R: FrameNew[i + 1, j + 1] := p[3 * j + 2];
+      RGB_G: FrameNew[i + 1, j + 1] := p[3 * j + 1];
+      RGB_B: FrameNew[i + 1, j + 1] := p[3 * j];
+      YIQ_Y: FrameNew[i + 1, j + 1] := round(0.299 * p[3 * j + 2] + 0.587 * p[3 * j + 1] + 0.114 * p[3 * j]);
+      YIQ_I: FrameNew[i + 1, j + 1] := round(0.596 * p[3 * j + 2] + 0.274 * p[3 * j + 1] + 0.321 * p[3 * j]);
+      YIQ_Q: FrameNew[i + 1, j + 1] := round(0.211 * p[3 * j + 2] + 0.523 * p[3 * j + 1] + 0.311 * p[3 * j]);
+      end;
+      if UGlobal.GrayCode then
+        FrameNew[i + 1, j + 1] := FrameNew[i + 1, j + 1] xor (FrameNew[i + 1, j + 1] shr 1);
     end;
   end;
 end;
@@ -150,28 +154,27 @@ begin
   for row := 1 to UGlobal.PicH do
     for col := 1 to UGlobal.PicW do
     begin
-{$IF BaseType=btMDiff}
-      val := FrameNew[row, col] - FrameOld[row, col];
-{$IFEND}
-{$IF BaseType=btLDiff}
-      val := FrameNew[row, col] xor FrameOld[row, col];
-{$IFEND}
-{$IF BaseType=btFrag}
-      val := FrameNew[row, col];
-{$IFEND}
-{$IF BitNum=9}
-      if val > 0 then
-        val := 255
-      else
-        val := -255;
-{$IFEND}
-{$IF BitNum in [1..8]}
-      val := val and (1 shl (BitNum - 1));
-      if val > 0 then
-        val := 255
-      else
-        val := -255;
-{$IFEND}
+      if BaseType = btMDiff then
+        val := FrameNew[row, col] - FrameOld[row, col];
+      if BaseType = btLDiff then
+        val := FrameNew[row, col] xor FrameOld[row, col];
+      if BaseType = btFrag then
+        val := FrameNew[row, col];
+      if BitNum = 9 then
+      begin
+        if val > 0 then
+          val := 255
+        else
+          val := -255;
+      end;
+      if BitNum in [1 .. 8] then
+      begin
+        val := val and (1 shl (BitNum - 1));
+        if val > 0 then
+          val := 255
+        else
+          val := -255;
+      end;
       FrameData[row, col] := val;
     end;
 end;
@@ -187,20 +190,17 @@ begin
     pr := BMOut.ScanLine[i];
     for j := 0 to UGlobal.PicW - 1 do
     begin
-{$IF BitNum=0}
-{$IF BaseType=btMDiff}
-      val := 128 + (FrameData[i + 1, j + 1] div 2);
-{$IFEND}
-{$IF BaseType=btLDiff}
-      val := FrameData[i + 1, j + 1];
-{$IFEND}
-{$IF BaseType=btFrag}
-      val := FrameData[i + 1, j + 1];
-{$IFEND}
-{$IFEND}
-{$IF BitNum in [1..9]}
-      val := FrameData[i + 1, j + 1];
-{$IFEND}
+      if BitNum = 0 then
+      begin
+        if BaseType = btMDiff then
+          val := 128 + (FrameData[i + 1, j + 1] div 2);
+        if BaseType = btLDiff then
+          val := FrameData[i + 1, j + 1];
+        if BaseType = btFrag then
+          val := FrameData[i + 1, j + 1];
+      end;
+      if BitNum in [1 .. 9] then
+        val := FrameData[i + 1, j + 1];
       pr[3 * j] := val;
       pr[3 * j + 1] := val;
       pr[3 * j + 2] := val;
@@ -410,12 +410,12 @@ procedure ProcessFrame;
 begin
   FrameOld := FrameNew;
   LoadFrameFromBitMap;
-{$IF UGlobal.FilterType=ftAVG}
-  AVG_Filter(FilterH, FilterW);
-{$IFEND}
-{$IF UGlobal.FilterType=ftMedian}
-  MedianFilter(FilterH, FilterW);
-{$IFEND}
+  case FilterType of
+  ftNone:;
+  ftAVG: AVG_Filter(FilterParam, FilterParam);
+  ftMedian: Median_Filter(FilterParam, FilterParam);
+  ftThresold: Thresold_Filter(FilterParam);
+  end;
   CreateFrameData;
   ShowResultFrame;
   CreateFrameBase;
@@ -466,6 +466,9 @@ begin
   BMOut.Width := UGlobal.PicW;
   BMOut.Height := UGlobal.PicH;
   BMOut.PixelFormat := pf24bit;
+
+  FilterType := ftNone;
+  FilterParam := 0;
 end;
 
 procedure WriteList;

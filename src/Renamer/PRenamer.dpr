@@ -13,20 +13,9 @@ begin
   try
     DeleteFile('GetBaseInfo.exe');
     DeleteFile('MergeBases.exe');
-    case UGlobal.BaseType of
-    btFrag: bt := 'FR';
-    btLDiff: bt := 'LD';
-    btMDiff: bt := 'MD';
-    end;
-    if UGlobal.GrayCode then
-      bt := bt + '_GC';
-    size := inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
-    if UGlobal.BitNum = 0 then
-      bp := ''
-    else
-      bp := '_BP' + inttostr(UGlobal.BitNum);
 
-    RenameFile('GetBase.exe', 'GB_' + bt + '_' + size + bp + '.exe')
+    size := inttostr(UGlobal.ElemH) + 'x' + inttostr(UGlobal.ElemW);
+    RenameFile('GetBase.exe', 'GB_' + size + '.exe')
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
