@@ -12,8 +12,8 @@ const
   ElemW = 5; // Ширина окна
   ElemSize = ElemH * ElemW; // Размер окна
 
-  PicH = 536; // Высота кадра
-  PicW = 720; // Ширина кадра
+  PicH = 384; // Высота кадра
+  PicW = 510; // Ширина кадра
   FrameBaseSize = PicH * PicW div ElemSize; // Количество окон в кадре
 
 {$IF (PicH mod ElemH <> 0) or (PicW mod ElemW <> 0)}

@@ -35,8 +35,6 @@ end;
 
 begin
   try
-    UGlobal.BaseType := btLDiff;
-    UGlobal.bpp := 1;
     ReadFromFile();
     writeln('Данные считаны. Вычисление энтропии...');
     WriteBaseInfo(Paramstr(1) + '.txt');

@@ -107,7 +107,6 @@ var
   NBase, NFilm: int64;
   ElemBitLength: word;
 begin
-  CompLevel := 1;
   NBase := GetNBase();
   NFilm := GetNFilm();
   Entropy := GetEntropy();

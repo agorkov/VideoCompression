@@ -45,8 +45,6 @@ var
   SegCount, SegNum: word;
   i: word;
   tmp: string;
-  f: TextFile;
-  T: TDateTime;
 begin
   FMain.ClientWidth := 2 * PicW + 3 * 8;
   FMain.ClientHeight := PicH + 2 * 20 + 4 * 8;
@@ -144,7 +142,6 @@ begin
   else
     Halt;
 
-  T := Now;
   SegCount := 0;
   while FileExists(GetFullSegmentName(string(USettings.FileName), SegCount)) do
     SegCount := SegCount + 1;
@@ -180,14 +177,6 @@ begin
     end;
   end;
   UProcess.WriteList;
-  T := Now - T;
-  AssignFile(f, 'time.txt');
-  if FileExists('time.txt') then
-    Append(f)
-  else
-    rewrite(f);
-  writeln(f, BaseName + ' ' + timetostr(T));
-  CloseFile(f);
   FMain.Close;
 end;
 

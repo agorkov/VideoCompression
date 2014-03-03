@@ -107,16 +107,16 @@ var
   NBase, NFilm: int64;
   ElemBitLength: word;
 begin
-  CompLevel := 1;
   NBase := GetNBase();
   NFilm := GetNFilm();
   Entropy := GetEntropy();
   ElemBitLength := UGlobal.ElemSize * UGlobal.bpp;
-  case UGlobal.BaseType of
-  btFrag: CompLevel := (NBase * (ElemBitLength + 2)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
-  btLDiff: CompLevel := (NBase * (ElemBitLength + 2)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
-  btMDiff: CompLevel := (NBase * (ElemBitLength + 2 + UGlobal.ElemSize)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
-  end;
+  if UGlobal.BaseType = btFrag then
+    CompLevel := (NBase * (ElemBitLength + 2)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
+  if UGlobal.BaseType = btLDiff then
+    CompLevel := (NBase * (ElemBitLength + 2)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
+  if UGlobal.BaseType = btMDiff then
+    CompLevel := (NBase * (ElemBitLength + 2 + UGlobal.ElemSize)) / (NFilm * ElemBitLength) + Entropy / ElemBitLength;
 end;
 
 procedure InitList;

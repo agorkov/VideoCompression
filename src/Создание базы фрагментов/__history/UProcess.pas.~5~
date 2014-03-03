@@ -302,19 +302,17 @@ procedure WriteList;
 var
   FileName: string;
   FS: TFIleStream;
-  elem: TElem;
-  count: int64;
-  relem: TRElem;
+  elem: TPRListElem;
 begin
+  DropToList;
   FileName := USettings.BaseName;
   FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
-  for elem in FrameBase.Keys do
+  elem := DLF^.next;
+  while elem <> DLL do
   begin
-    FrameBase.TryGetValue(elem, count);
-    relem.elem := elem;
-    relem.count := count;
-    FS.Write(relem, SizeOf(UElem.TRElem));
-    UStatList.AddID(relem.count);
+    FS.Write(elem^.elem, SizeOf(UElem.TRElem));
+    UStatList.AddID(elem^.elem.count);
+    elem := elem^.next;
   end;
   UStatList.WriteBaseInfo(USettings.BaseName + '.txt');
   FS.Free;
