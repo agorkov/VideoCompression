@@ -10,34 +10,20 @@ var
   FrameNum: LongWord;
 
 procedure ProcessFrame;
-function BaseFull: byte;
-procedure WriteList;
+procedure WriteBase;
 
 implementation
 
 uses
-  UGlobal, UElem, SysUtils, Windows, UFMain, USettings, Classes, UStatList, Generics.Collections;
-
-const
-  MAX_BUFFER_SIZE = 15000000;
+  UGlobal, UElem, SysUtils, Windows, UFMain, USettings, Classes, UStatList, Generics.Collections, Generics.Defaults;
 
 type
-  TPRListElem = ^TRListElem;
-
-  TRListElem = record
-    elem: UElem.TRElem;
-    prev, next: TPRListElem;
-  end;
-
   TFrame = array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of byte;
 
 var
   FrameOld, FrameNew: TFrame;
   FrameData: array [1 .. UGlobal.PicH, 1 .. UGlobal.PicW] of integer;
-  FrameBase: TDictionary<TElem, int64>;
-  BASE_COUNT: LongWord;
-  elemBuffer: array [1 .. MAX_BUFFER_SIZE] of TPRElem;
-  DLF, DLL: TPRListElem;
+  ElemBase: TDictionary<TElem, int64>;
 
 function GetPixelValue(i, j: integer): byte;
 begin
@@ -117,7 +103,7 @@ begin
     end;
 end;
 
-procedure LoadFrameFromBitMap;
+procedure LoadFrame;
 var
   i, j: LongWord;
   p: pByteArray;
@@ -149,12 +135,11 @@ begin
   for row := 1 to UGlobal.PicH do
     for col := 1 to UGlobal.PicW do
     begin
-      if BaseType = btMDiff then
-        val := FrameNew[row, col] - FrameOld[row, col];
-      if BaseType = btLDiff then
-        val := FrameNew[row, col] xor FrameOld[row, col];
-      if BaseType = btFrag then
-        val := FrameNew[row, col];
+      case BaseType of
+      btMDiff: val := FrameNew[row, col] - FrameOld[row, col];
+      btLDiff: val := FrameNew[row, col] xor FrameOld[row, col];
+      btFrag: val := FrameNew[row, col];
+      end;
       if BitNum = 9 then
       begin
         if val > 0 then
@@ -204,7 +189,7 @@ begin
   UFMain.FMain.Image1.Picture.Bitmap.Assign(BMOut);
 end;
 
-procedure CreateFrameBase;
+procedure GetFrameElements;
 var
   row, col, i, j, p: word;
   elem: TElem;
@@ -223,11 +208,11 @@ begin
           elem[p] := FrameData[i, j];
           p := p + 1;
         end;
-      if FrameBase.TryGetValue(elem, count) then
+      if ElemBase.TryGetValue(elem, count) then
         count := count + 1
       else
         count := 1;
-      FrameBase.AddOrSetValue(elem, count);
+      ElemBase.AddOrSetValue(elem, count);
       col := col + UGlobal.ElemW;
     end;
     row := row + UGlobal.ElemH;
@@ -238,7 +223,7 @@ end;
 procedure ProcessFrame;
 begin
   FrameOld := FrameNew;
-  LoadFrameFromBitMap;
+  LoadFrame;
   case FilterType of
   ftNone:;
   ftAVG: AVG_Filter(FilterParam, FilterParam);
@@ -247,7 +232,7 @@ begin
   end;
   CreateFrameData;
   ShowResultFrame;
-  CreateFrameBase;
+  GetFrameElements;
   FrameNum := FrameNum + 1;
 end;
 
@@ -257,12 +242,6 @@ var
 begin
   FrameNum := 0;
 
-  BASE_COUNT := 0;
-  for i := 1 to MAX_BUFFER_SIZE do
-  begin
-    elemBuffer[i] := nil;
-  end;
-
   for i := 1 to UGlobal.PicH do
     for j := 1 to UGlobal.PicW do
     begin
@@ -270,17 +249,6 @@ begin
       FrameOld[i, j] := 0;
       FrameData[i, j] := 0;
     end;
-
-  NEW(DLF);
-  NEW(DLL);
-  DLF^.prev := nil;
-  DLF^.next := DLL;
-  for i := 1 to UGlobal.ElemSize do
-    DLF^.elem.elem[i] := -300;
-  DLL^.prev := DLF;
-  DLL^.next := nil;
-  for i := 1 to UGlobal.ElemSize do
-    DLL^.elem.elem[i] := 300;
 
   BMIn := Vcl.Graphics.TBitMap.Create;
   BMIn.Width := UGlobal.PicW;
@@ -292,37 +260,45 @@ begin
   BMOut.Height := UGlobal.PicH;
   BMOut.PixelFormat := pf24bit;
 
-  FilterType := ftNone;
-  FilterParam := 0;
-
-  FrameBase := TDictionary<TElem, int64>.Create;
+  ElemBase := TDictionary<TElem, int64>.Create;
 end;
 
-procedure WriteList;
+procedure WriteBase;
 var
   FileName: string;
   FS: TFIleStream;
   elem: TElem;
   count: int64;
   relem: TRElem;
+  l: TList<TRElem>;
+  TRElemComparer: TComparison<TRElem>;
 begin
-  FileName := USettings.BaseName;
-  FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
-  for elem in FrameBase.Keys do
+
+  TRElemComparer := function(const e1, e2: TRElem): integer
+    begin
+      result := UElem.CompareElem(e1.elem, e2.elem) - 1;
+    end;
+
+  l := TList<TRElem>.Create;
+  for elem in ElemBase.Keys do
   begin
-    FrameBase.TryGetValue(elem, count);
+    ElemBase.TryGetValue(elem, count);
     relem.elem := elem;
     relem.count := count;
+    l.Add(relem);
+  end;
+  ElemBase.Clear;
+  l.Sort(TComparer<TRElem>.Construct(TRElemComparer));
+
+  FileName := USettings.BaseName;
+  FS := TFIleStream.Create(string(FileName + '.base'), fmCreate);
+  for relem in l do
+  begin
     FS.Write(relem, SizeOf(UElem.TRElem));
     UStatList.AddID(relem.count);
   end;
   UStatList.WriteBaseInfo(USettings.BaseName + '.txt');
   FS.Free;
-end;
-
-function BaseFull: byte;
-begin
-  BaseFull := round(BASE_COUNT / MAX_BUFFER_SIZE * 100);
 end;
 
 initialization

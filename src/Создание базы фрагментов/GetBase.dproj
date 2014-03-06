@@ -5,7 +5,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>GetBase.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<Platform Condition="'$(Platform)'==''">Win64</Platform>
 			<TargetedPlatforms>2</TargetedPlatforms>
 			<AppType>Application</AppType>
@@ -89,7 +89,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-			<Debugger_RunParams>TOS RGB.R LD -GC BP8 N</Debugger_RunParams>
+			<Debugger_RunParams>ALA RGB.R FR -GC BP0 N</Debugger_RunParams>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -121,7 +121,6 @@
 			<DCCReference Include="USettings.pas"/>
 			<DCCReference Include="..\Shared units\UElem.pas"/>
 			<DCCReference Include="..\Shared units\UStatList.pas"/>
-			<DCCReference Include="UList.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

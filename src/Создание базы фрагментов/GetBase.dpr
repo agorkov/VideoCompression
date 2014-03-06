@@ -7,8 +7,7 @@ uses
   UGlobal in '..\Shared units\UGlobal.pas',
   USettings in 'USettings.pas',
   UElem in '..\Shared units\UElem.pas',
-  UStatList in '..\Shared units\UStatList.pas',
-  UList in 'UList.pas';
+  UStatList in '..\Shared units\UStatList.pas';
 
 {$R *.res}
 

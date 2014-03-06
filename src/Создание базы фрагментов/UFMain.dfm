@@ -46,13 +46,6 @@ object FMain: TFMain
     Width = 97
     Height = 97
   end
-  object Gauge1: TGauge
-    Left = 8
-    Top = 137
-    Width = 200
-    Height = 20
-    Progress = 0
-  end
   object MP: TMediaPlayer
     Left = 0
     Top = 0

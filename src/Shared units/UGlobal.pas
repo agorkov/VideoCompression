@@ -9,7 +9,7 @@ type
 
 const
   ElemH = 2; // Высота окна
-  ElemW = 5; // Ширина окна
+  ElemW = 9; // Ширина окна
   ElemSize = ElemH * ElemW; // Размер окна
 
   PicH = 536; // Высота кадра

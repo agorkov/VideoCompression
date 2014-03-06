@@ -11,7 +11,6 @@ type
     PVideo: TPanel;
     ProgressBar1: TProgressBar;
     Image1: TImage;
-    Gauge1: TGauge;
     procedure FormActivate(Sender: TObject);
   private
     { Private declarations }
@@ -49,7 +48,7 @@ var
   T: TDateTime;
 begin
   FMain.ClientWidth := 2 * PicW + 3 * 8;
-  FMain.ClientHeight := PicH + 2 * 20 + 4 * 8;
+  FMain.ClientHeight := PicH +  20 + 3 * 8;
 
   PVideo.Height := PicH;
   PVideo.Width := PicW;
@@ -64,9 +63,6 @@ begin
   ProgressBar1.Width := 2 * PicW + 8;
   ProgressBar1.Left := 8;
   ProgressBar1.Top := 8 + PicH + 8;
-  Gauge1.Width := 2 * PicW + 8;
-  Gauge1.Left := 8;
-  Gauge1.Top := 8 + PicH + 8 + 20 + 8;
 
   if paramcount = 6 then
   begin
@@ -173,13 +169,12 @@ begin
         UProcess.BMIn.Canvas.CopyRect(Rect(0, 0, UProcess.BMIn.Width, BMIn.Height), FMain.Canvas, Rect(PVideo.Left, PVideo.Top, PVideo.Left + PVideo.Width - 1, PVideo.Top + PVideo.Height - 1));
         UProcess.ProcessFrame;
         ProgressBar1.StepBy(1);
-        Gauge1.Progress := UProcess.BaseFull;
         Application.ProcessMessages;
       end;
       MP.Close;
     end;
   end;
-  UProcess.WriteList;
+  UProcess.WriteBase;
   T := Now - T;
   AssignFile(f, 'time.txt');
   if FileExists('time.txt') then
